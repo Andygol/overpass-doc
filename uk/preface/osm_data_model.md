@@ -1,191 +1,172 @@
-The Data Model of OpenStreetMap
-===============================
+Модель даних OpenStreetMap
+==========================
 
-To understand how Overpass API works
-the data model of OpenStreetMap is introduced here ahead of everything else.
+Для того, щоб зрозуміти як працює Overpass API
+потрібно в першу чергу розглянути модель даних OpenStreetMap.
 
-In this section we introduce the basic data structures of OpenStreetMap.
-OpenStreetMap foremost contains three kinds of data:
+У цьому розділі ми розглянемо основні структури даних OpenStreetMap.
+OpenStreetMap насамперед містить три типи даних:
 
-* Geometries, more precisely coordinates and references to the coordinates, locate the objects on Earth's surface.
-* Short bits of text give each object a semantical meaning.
-* Meta data facilitates to attribute the sources to the data.
+* Геометрія, а точніше координати та посилання на координати, описує положення об'єктів на земній поверхні.
+* Короткі фрагменти тексту надають кожному об'єкту семантичного значення.
+* Метадані допомагають зіставити джерела з даними.
 
-All selection criteria of the query language deal with properties of these data structures.
+Усі критерії вибору мови запитів стосуються властивостей цих структур даних.
 
-In addition, multiple data formats can represent the data.
-These data formats are presented in the section [Data Formats](../targets/formats.md).
+Крім того, дані можуть представлятись кількома форматами даних.
+Більш докладно про це йдеться в розділі [Формати даних](../targets/formats.md).
 
-Handling the different object type such that it results in manageable geometry deserves a tutorial.
-This tutorial is the section [Geometries](../full_data/osm_types.md).
+Обробка різних типів геометрії, так щоб в результаті отримати геометричні форми з якими можна працювати, заслуговує власного посібника.
+Такий посібник ви знайдете в розділі [Геометрія](../full_data/osm_types.md).
 
 <a name="tags"/>
-## Tags
+## Теґи
 
-The semantical data of OpenStreetMap are encoded in short bits of text, so called _tags_.
-_Tags_ always consist of a _key_ and a _value_.
-Each object can have for each _key_ at most one _value_.
-Beside a length restriction to 255 characters for each key and value no further constraints apply.
+Семантика даних OpenStreetMap описується за допомогою коротких текстових фрагментів, які називаються  _теґами_.
+_Теґи_ складаються з пари _ключ_ та _значення_.
+Кожен об'єкт може мати для кожного _ключа_ не більше одного _значення_.
+Крім обмеження довжини у 255 символів для кожного ключа та значення, інші обмеження не застосовуються.
 
-The data model does not distinguish any particular tag or key.
-Tags can be chosen spontaneously and to best expedience;
-this policy is highly likely to have promoted the success of OpenStreetMap.
+Модель даних не виділяє жодного конкретного тегу чи ключа.
+Теги можна вибирати спонтанно та наскільки це зручно;
+ця правило, швидше за все, посприяло успіху OpenStreetMap.
 
-Latin lowercase letters and rarely the special characters `:` and `\_` virtually exclusively prevail amongst the keys.
-The tags fall into the two informal categories:
+В ключах практично виключно переважають літери латинської абетки в нижньому регістрі та іноді спеціальні символи `:` і `\_`.
+Теґи поділяють на дві неформальні групи:
 
-_Classifying tags_ have one of a few keys,
-and for each key only few values exist.
-Deviating values are perceived as erroneous.
-For example, the public road grid for motorized vehicles is identified by the key [highway](https://taginfo.openstreetmap.org/keys/highway) and one of fewer than 20 customary values.
+Теґи, що використовуються для _класифікації_ об'єктів мають один з визначених ключів,
+кожен з яких має наперед визначені переліки значень.
+Відхилення від них вважатиметься помилкою.
+Наприклад, для позначення доріг, які використовуються для руху траспортних засобів, застосовується ключ [highway](https://taginfo.openstreetmap.org/keys/highway) разом з одним із визначеним мапером значенням.
 
-In such tags, a value occasionally accommodates multiple customary values concatenated by semicolon.
-This is a generally at least tolerated practice to set multiple values for a single key on the same object.
+У таких теґах значення іноді може містити кілька значень, об'єднаних крапкою з комою.
+Це, як правило, є допустимою практикою встановлення кількох значень для одного ключа на одному об'єкті.
 
-_Describing tags_ have only fixed keys
-while anything is accepted in the value
-including lowercase and uppercase letters as well as numbers, special characters, and punctuation marks.
-Names are the most prominent use case.
-But descriptions, identifiers, or even sizes as well are commonplace.
+Теґи, що використовуються для _опису_ мають лише фіксовані ключі, в той час, як в його значенні може бути будь-яка довільна інформація, що містить літери верхнього та нижнього регістрів, числа, спеціальні символи, розділові знаки.
+Назви - найпомітніший випадок.
+Але описи, ідентифікатори або навіть розміри також є звичайною справою.
 
-The most generally acclaimed sources for key's and value's semantics are:
+Найпопулярніші джерела семантики ключів та значень:
 
-* the [OSM wiki](https://wiki.openstreetmap.org/wiki/Map_Features).
-  It offers longer textual descriptions.
-  But it can happen that the texts rather reflect the respective author's vision than the actual use.
+* [Вікі OSM](https://wiki.openstreetmap.org/wiki/Uk:Map_Features).
+  Містить докладні описи теґів та правила їх застосування.
+  Але іноді трапляється так, що опис віддзеркалює бачення автора тексту ніж справжню практику застосування теґу.
 * [Taginfo](https://taginfo.openstreetmap.org/).
-  Counts tags by their actual appearance.
-  Collects links to most other resources of information about the respective tags.
+  Рахує кількість теґів в даних.
+  Містить посилання на інші ресурси з інформацією щодо зазначених теґів.
 
-The complete chapter [Find Objects](../criteria/index.md) is devoted to search of objects by tags.
+Розділ [Пошук об'єктів](../criteria/index.md) присвячено саме пошуку об'єктів за їх теґами.
 
 <a name="nwr"/>
-## Nodes, Ways, Relations
+## Точки, Лінії, Зв'язки
 
-OpenStreetMap has three types of objects.
-Every object can carry an arbitrary number of tags.
-Also, every object has an id.
-The combination of type and id is unique, but the id alone is not.
+OpenStreetMap має три типи об'єктів.
+Кожен з них може мати довільну кількість теґів.
+Крім цього, кожен з об'єктів має ідентифікатор.
+Поєднання типу об'єкту та його ідентифікатора є унікальним, сам по собі ідентифікатор не унікальний.
 
-_Nodes_ are defined as a coordinate in addition to the id and tags.
-A node can represent a point of interest, or an object of minuscule extent.
-Because nodes are the only type of object that has a coordinate,
-most of the nodes serve only as a coordinate for an intermediate point within a way
-and carry no tags.
+_Точки_ крім ідентифікатора та теґів визначаються координатами.
+Точка може представляти об'єкт інтересу чи об'єкт невеликого розміру.
+Через те, що тільки точки мають координати, більшість з них відіграють роль проміжних точок в лініях і не мають власних теґів.
 
-_Ways_ consists of a sequence of references to nodes in addition to the id and tags.
-This way ways get a geometry by using the coordinates of the referenced nodes.
-But they also get a topology:
-two ways are connected if both point at a position to the same node.
+_Лінії_ складаються з послідовності точок на додачу до ідентифікатора та теґів, що позначають чим є лінія.
+Лінії отримують власну геометрію використовуючи координати точок, з яких вони складаються.
+Крім цього лінія має власну топологію:
+дві лінії вважаються з'єднаними, якщо до їх складу входить одна й та ж точка.
 
-Ways can refer to the same node multiple times.
-The common case for this is a closed way where the first and last entry point to the same node.
-All other cases are syntactically correct but semantically deprecated.
+Лінії можуть посилатись на одну точку кілька разів.
+Наприклад, замкненна лінія, коли кінець та початок лінії збігаються в одній тій самій точці.
+Усі інші випадки є синтаксично правильними, але семантично застарілими.
 
-_Relations_ have a sequence of members in addition to the id and tags.
-Each member is a pair of a reference to a node, a way or a relation and a so-called role.
-The role is a text string.
-Relations have been invented to represent turn restrictions
-thus having few members.
-Nowadays, they also serve as boundaries of countries, counties, multipolygons, and routes.
-Therefore, their formal structure wildly varies,
-and in particular boundary and route relations can extend over hundreds or thousands of kilometers.
+_Зв'язки_ складаються з послідовності членів на додачу до ідентифікатора та теґів.
+Членами зв'язку можуть бути точки, лінії та інші зв'язки, які можуть мати роль (ролі описують властивості членів в межах зв'язку).
+Роль - текстовий рядок.
+Зв'язки було запроваджено для мапінгу обмежень маневрів, що складаються із кількох членів.
+Зараз, зв'язки використовуються для мапігу кордонів країн, штатів, мультиполігонів та зазначення маршрутів.
+Отже, їх структура досить різноманітна, а кордони та маршрути можуть простягатись на тисячі кілометрів.
 
-The geometry of relations only manifests by the interpretation of the data user.
-The multipolygon interpretation has found general acclaim:
-like for ways, such relations are understood as an area if the members form closed rings.
-Interpretations start at the question whether the presence of the tag _area_=_yes_ is required for this.
-Other relations like routes or turn restrictions obtain their geometry as the sum of the geometries of their members of type node and way.
+Геометрія зв'язків проявляється лише під час їх інтерпретації користувачами даних.
+Інтерпретація мультиполігонів отримала таке загальне визнання:
+так само як і лінії, зв'язки вважаться полігонами, коли їх члени утворюють замкнені контур(и).
+Інтерпретації починаються з питання, чи потрібна для цього наявність тегу _area_=_yes_.
+Інші зв'язки, такі як обмеження маневрів чи маршрути, отримують свою геометрію як суму геометрій їхніх членів, точок та ліній.
 
-Relations on top of relations are technically possible,
-but have little practical relevance.
-With relations on relations the risk is further elevated
-to end up with large amounts of data already if just the members of a single relation are resolved.
-For that reason there are so many different approaches depending on context to resolve references of relations partially
-that a [whole section](../full_data/osm_types.md#rels_on_rels) is dedicated to that.
+Зв'язки, які складаються зі зв'язків технічно можливі, але не завжди мають практичне значення.
+В такому випадку, коли ви отримуєте лише одного члена зв'язку, значно зростає ймовірність отримати всі його батьківські зв'язки, що не завжди потрібно.
+Тому існує багато різних способів, в залежності від того що ви намагаєтесь отримати, щоб не витягувати [весь зв'язок](../full_data/osm_types.md#rels_on_rels).
 
 <a name="areas"/>
-## Areas
+## Полігони
 
-Areas do not have an explicit data structure in OpenStreetMap.
-They are instead modeled by closed _ways_ or _relations_.
-Tags do matter to distinguish areas from ways closed for other reasons,
-in the simplest case by the tag _area_=_yes_.
+Полігони не мають власного типу даних в OpenStreetMap.
+Вони утворюються за допомогою замкнених _ліній_ чи _зв'язків_.
+Теґи мають значення для визначення того чи об'єкт є полігоном чи замкненою лінією,
+найпростіший спосіб - додати теґ _area_=_yes_.
 
-Closed ways are used if the area is contiguous and does not have holes.
-A way is closed if its first and last reference point to the same node.
+Замкнені лінії використовуються у випадках коли ділянка не містить отворів.
+Лінія вважається замкненою, якщо перша та остання точки збігаються.
 
-Relations are used if a way does no longer suffice for the area.
-Beside holes and disjoint parts this also happens
-when the boundary of the area is supposed to be assembled of multiple ways.
-This is applicable virtually only to boundaries of large areas (cities, counties, countries).
+Зв'язки використовуються коли використання замкненої лінії не підходить.
+Крім позначення отворів та розділених на окремі частини територій, зв'язки використовуються для позначення меж територій, які складаються з кількох з'єднаних один з одним відрізків.
+Зазвичай це більше стосуються меж великих територій (міст, областей, країн).
 
-Like with ways the area is defined by its boundary.
-The in the relation referenced ways therefore must fit and sum up to closed rings.
-More information on the [conventions](https://github.com/osmlab/fixing-polygons-in-osm/blob/master/doc/background.md).
+Так само як і у випадку з лініями, території визначаються їх межами.
+Таким чином, у згаданих зв'язках лінії повинні утворювати замкнені кільця.
+Більше відомостей про [конвенції](https://github.com/osmlab/fixing-polygons-in-osm/blob/master/doc/background.md).
 
 <a name="metas"/>
-## Meta Data
+## Метадані
 
-OpenStreetMap is a full-fledged version control system.
-Old versions are retained as well as all the data necessary to assign changes to users.
+В OpenStreetMap є повноцінна система контролю версій.
+Старі версії зберігаються так само як і те ким були зроблені зміни.
 
-There always is per object and state a _version number_ and _timestamp_.
-Old states with old version numbers are retained.
-Therefore the Overpass API is capable by [special methods](../analysis/index.md) to access old states.
-Unless on special request, it always operates on current data.
+Для кожного об'єкта зберігається _номер версії_ та _відбиток часу_.
+Залишаються попередні версії та стан об'єктів залишаються в базі.
+Overpass API здатен з допомогою [спеціальних методів](../analysis/index.md) отримувати доступ до попередніх станів.
+Але без використання спеціальних запитів Overpass API завжди працює з поточними даними.
 
-In addition, changed are grouped to _changesets_.
-These are associated to the uploading mapper.
-The grouping is done automatically by the editing software
-and in general one changeset per upload event is created.
+На додачу, зміни групуються за _наборами змін_.
+Вони асоціюються з мапером, який їх завантажив до бази даних.
+Таке групування відбувається автоматично програмою редактором
+і зазвичай один набір змін містить - одне завантаження даних на сервер.
 
-_Changesets_ again carry tags and it is possible to discuss changesets with multiple mappers.
-These texts are not processed by the Overpass API.
+_Набори змін_ також мають власні теґи. Набори змін можна обговорювати з іншими маперами.
+Ці обговорення не обробляються Overpass API.
 
-This way each object as a whole is at any moment assigned to a single mapper.
-That mapper is always the mapper who has uploaded the most recent version.
-Objects with higher version number than 1 therefore usually keep properties from earlier versions,
-although those properties are not attributable to the current mapper.
+Таким чином кожен об'єкт асоціюється з певним мапером.
+Це мапер який завантажив останню версію змін.
+
+Тому об'єкти з номером версії вище ніж 1, зазвичай зберігають властивості попередніх версій, хоча ці властивості не можна віднести до поточного мапера.
 
 <a name="declined"/>
-## Layers, Categories, Identities
+## Шари, категорії, ідентичність
 
-By contrast, thematic layers do not exist in OpenStreetMap,
-and they are absent for a reason.
-For some people supermarkets are together with post offices, banks and ATMs are locations
-where one can obtain cash.
-For other mappers, supermarkets constitute a group rather together with bakeries and butchers
-because one can buy food there.
+На відміну від інших систем OpenStreetMap не містить тематичних шарів. Це зроблено навмисно.
 
-Therefore, classification plays only a marginal role in OpenStreetMap.
-It is rather preferable to record objective properties.
-Disputes at large have been prevented,
-and most mappers can record their point of view without substantial distortions.
+Для когось супермаркети разом з поштовими відділеннями, банками та банкоматами - це місця, де можна отримати готівку.
+Для інших супермаркети - це група місць, скоріше спільна з пекарнями та м'ясними лавками, оскільки там можна купити їжу.
 
-Another often expected structures are categories,
-no matter whether very general like all branches of a fast food chain
-or all post boxes in Scotland.
-OpenStreetMap is a spatial database.
-Lists of all objects with a special property in a limited area can be computed.
-By the way, Overpass API is one of the tools intended to deliver that,
-the chapter [Find Objects](../criteria/index.md) explains how to do that.
+Тому класифікація відіграє лише незначну роль в OpenStreetMap.
+Доцільніше реєструвати об’єктивні властивості.
+Загалом суперечкам вдалося запобігти, і більшість маперів можуть зазначити свою точку зору без істотних спотворень.
 
-Lists of worldwidely all objects with a property have at best a weak spatial relevance.
-Although each branch has a location,
-the fast food chain as a whole obtains its spatial information solely through its branches.
+Іншими часто очікуваними структурами є категорії, незалежно від того, чи є вони загальними, як усі відділення мережі швидкого харчування або всі поштові скриньки в Шотландії.
+OpenStreetMap - геопросторова база даних.
+Перелік всіх об'єктів з певними властивостями на обмеженій території може бути обчислений.
+До того ж Overpass API є одним з інструментів призначеним для цього, в розділі [Пошук об'єктів](../criteria/index.md) пояснюється як це зробити.
 
-Finally, the concept of identity leaves precedence to its spatial manifestation.
-Similar to the issue with layers, different mappers have different ideas
-what belongs to a thing as complex as a large railway station.
-Only tracks and platforms?
-The reception building as well, or only if it caters passengers needs,
-or only if the railway company owns the building?
-The place before the station, the bus stop that is named after the railway station?
-The points that by railway operating rules are associated with the station even if substantially far away?
+Переліки об'єктів у всьому світі, що мають певні властивості, у кращому випадку, мають слабку геопросторову релевантність.
+Хоча кожна філія має місце розташування, мережа швидкого харчування в цілому отримує свою просторову інформацію виключно через свої відділення.
 
-If one needs an anchor to point at a certain object on the ground,
-then it is best to use a coordinate.
-Stationary objects do not move by their very definition
-and the positional accuracy in OpenStreetMap is good enough
-such that a coordinate is the best anchor for linking.
+Нарешті, концепція ідентичності залишає пріоритет її просторовому прояву.
+Подібно до проблеми зі шарами, різні мапери мають різні уявлення про те, що належить до такої складної речі, як велика залізнична станція.
+Тільки рейки та платформи?
+Чи також будівля станції, чи тільки якщо вона обслуговує пасажирів, або якщо тільки вона належить залізничній компанії?
+Площа перед вокзалом, автобусні зупинки, що мають назву подібну до назви станції?
+Точки, які за правилами експлуатації залізниці пов'язані зі станцією, навіть якщо вони знаходяться далеко?
+
+Якщо є потреба прив'язати точку певного об'єкта до землі - краще для цього скористатись координатами.
+
+Стаціонарні об’єкти не рухаються за своїм визначенням
+і позиційна точність в OpenStreetMap досить хороша
+таким чином, що координати є найкращим якорем для цього.
