@@ -1,118 +1,117 @@
-Run time model
-==============
+Модель роботи
+=============
 
-By which rules Overpass API executes a request?
-Presenting each building block creates the insight
-how these building boxes together are effective as a request.
+За якими правилами Overpass API обробляє запити?
+Кожен блок запиту дає уявлення
+як ці елементи складаються в робочий запит.
 
 <a name="sequential"/>
-## Sequential Execution
+## Послідовне виконання
 
-Most sophisticated use cases for requests require to select elements relative to previous results.
-A good example is supermarkets that are close to a railway station.
-The supermarkets are related to the railway stations only by spatially being close to it.
+Більшість складних варіантів використання запитів вимагає вибору елементів з попередніх результатів.
+Гарним прикладом буде супермаркет, який знаходиться поруч із залізничною станцією.
+Супермаркет пов'язаний із залізницею лише тим, що вони знаходяться поруч один поруч з іншою.
 
-According to the sentence structure
-we first search supermarkets
-then only keep supermarkets in the selection for which we have found a station nearby.
-This approach in natural language quickly ends up in the muddle of relative sentences,
-and in a formal language this is not less annoying.
+Відповідно до побудови структури речення
+ми спочатку шукаємо супермаркет
+потім, ми залишаємо супермаркет в результатах пошуку для яких ми знаходимо станцію поблизу.
+Такий підхід, з використанням звичайної мови, швидко приводить нас до каламуті відносних речень,
+і в формальній мові запитів це дратує не менш.
 
-Therefore the query language of Overpass API adheres to a step-by-step paradigm,
-the so-called _imperative programming_.
-At each point in time only a simple task is processed
-and the complex tasks are accomplished by enqueuing multiple simple tasks.
-This brings us to the following approach:
+Тому мова запитів Overpass API дотримується покрокової парадигми,
+та званого _імперативного програмування_.
+В кожен момент часу виконується тільки одне просте завдання,
+а складні завдання вирішуються шляхом складання в чергу кількох простих завдань.
+Це підводить нас до наступного підходу:
 
-* Select all stations in the region of interest.
-* Replace the selection by the supermarkets close to objects in the found result.
-* Print the list of found supermarkets.
+* Вибір всіх станцій в зоні нашого інтересу (регіоні).
+* Заміна попереднього результату на супермаркети, які знаходяться поруч з об'єктами з попереднього кроку.
+* Вивід переліку знайдених супермаркетів.
 
-Line by line this results in the following query.
-You can [execute](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=13&Q=nwr%5Bpublic_transport%3Dstation%5D%28%7B%7Bbbox%7D%7D%29%3B%0Anwr%5Bshop%3Dsupermarket%5D%28around%3A100%29%3B%0Aout%20center%3B) it right now:
+Ці інструкції можна записати у вигляді наступного запиту.
+Ви можете [виконати](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=13&Q=nwr%5Bpublic_transport%3Dstation%5D%28%7B%7Bbbox%7D%7D%29%3B%0Anwr%5Bshop%3Dsupermarket%5D%28around%3A100%29%3B%0Aout%20center%3B) його зараз:
 
     nwr[public_transport=station]({{bbox}});
     nwr[shop=supermarket](around:100);
     out center;
 
-The details of the syntax are later explained.
+Пояснення синтаксису ви знайдете далі.
 
-For simpler cases one may want a simpler syntax,
-but the resulting two-line-solution reflects the clear separation of duties:
+В простому випадку вам згодиться спрощений синтаксис,
+але отримане дворядкове рішення показує чітке розділення обов'язків:
 
     nwr[shop=supermarket]({{bbox}});
     out center;
 
-* The selection statement in the first line selects _what_ is returned
-* The output statement commands _how_ the objects are returned. Details about that in the section [Formats](../targets/formats.md#faithful)
+* Вираз в першому рядку говорить _що_ ми хочемо знайти
+* Наступний вираз говорить про те _як_ ми хочемо отримати результат. Докладніше про це дивіться в розділі [Формати](../targets/formats.md#faithful)
 
 <a name="statements"/>
-## Instructions and Filters
+## Інструкції та фільтри
 
-We compare the request for simply the supermarkets in the visible bounding box
+Порівняємо запити де ми тільки отримуємо супермаркети з видимої частини мапи
 
     nwr[shop=supermarket]({{bbox}});
     out center;
 
-with the request from above
+із попереднім вище
 
     nwr[public_transport=station]({{bbox}});
     nwr[shop=supermarket](around:100);
     out center;
 
-to identify the components.
+для визначення компонентів.
 
-The most important character is the semicolon;
-every statement always ends with a semicolon.
-By contrast, whitespace (line breaks, spaces, and tabs) are for the entire syntax irrelevant.
-The statements are executed one after another in the order in which they are noted.
-In both requests together, there are four distinct statements:
+Найважливіший символ - крапка з комою;
+кожен вираз закінчується саме крапкою з комою.
+Натомість пробіли (перенесення рядків, відступи та інше) для всього синтаксису не мають значення.
+Вирази виконуються один за одним у тому порядку, в якому вони зазначені в тексті запиту.
+В обох запитах маємо чотири вирази разом:
 
 * ``nwr[shop=supermarket]({{bbox}});``
 * ``nwr[public_transport=station]({{bbox}});``
 * ``nwr[shop=supermarket](around:100);``
 * ``out center;``
 
-The statement ``out center`` is an output statement without further substructures.
-The possibilities to control the output format are elaborated in section [Formats](../targets/formats.md).
+Вираз ``out center`` відповідає за вивід та немає додаткових субструктур.
+Можливості керування виводом описані в розділі [Формати](../targets/formats.md).
 
-All the other statements are _query_ statements, i.e. they select objects.
-This applies to all statements starting with ``nwr`` and further keywords:
-The keywords ``node``, ``way``, and ``relation`` select the respective type of object,
-and ``nwr`` (abbreviating _nodes_, _ways_, and _relations_) admits all types of objects in the result.
-The _query_ statements have substructures appearing multiple times:
+Всі інші вирази є _запитами_, тобто вони кажуть які об'єкти потрібні.
+Це стосується всіх виразів що починаються з ``nwr`` та наступних ключових слів.  
+Слова ``node``, ``way`` та ``relation`` призначені для отримання об'єктів відповідних типів,
+``nwr`` (скорочення від _nodes_, _ways_, _relations_) включає об'єкти всіх типів в результат.
+Вираз _запит_ має субструктури, які з'являються кілька разів:
 
 * ``[shop=supermarket]`` and ``[public_transport=station]``
 * ``({{bbox}})``
 * ``(around:100)``
 
-All substructures of a _query_ statement constraint which objects are found.
-Therefore, they are called _filters_.
-It is possible to combine any number of filters in a statement.
-The _query_ statement selects exactly those objects that match all filter conditions.
-The order of the filters does not play any role
-because the filters are from a technical perspective applied in parallel.
+Всі субструктури виразу _запит_ обмежують те які об'єкти будуть знайдені.
+Тож, вони називаються _фільтри_.
+Ви можете використовувати разом будь-яку кількість фільтрів в одному виразі.
+_Запит_ буде шукати саме ті об'єкти, які відповідають умовам всіх фільтрів.
+Порядок фільтрів не важливий, бо з технічного боку вони накладаються паралельно.
 
-While ``[shop=supermarket]`` and ``[public_transport=station]`` admit all objects
-that carry a specific tag (supermarkets in one case, railway stations in the other),
-the filters ``({{bbox}})`` and ``(around:100)`` perform spatial filtering.
+В той час як ``[shop=supermarket]`` та ``[public_transport=station]`` містять всі об'єкти,
+які мають відповідні теґи (в одному випадку - супермаркети, в іншому залізничні станції),
+фільтри ``({{bbox}})`` та ``(around:100)`` відбирають об'єкти за просторовими характеристиками.
 
-The filter ``({{bbox}})`` matches exactly those objects
-that are fully or partially inside the supplied bounding box.
+Фільтр ``({{bbox}})`` дозволяє обрати всі об'єкти,
+які повністю або частково знаходяться в зазначеній області.
 
-A little bit more complicated works the ``(around:100)`` filter.
-It needs as input the previous result,
-then it accepts all objects that have to any of the given objects a distance of at most 100 meters.
+Складніше працює фільтр ``(around:100)``.
+Для роботи йому потрібні вхідні значення, значення отримані в попередньому запиті.
+Він шукає всі об'єкти які знаходяться від отриманих раніше об'єктів на відстані не більше 100 метрів.
 
-Here the step-by-step paradigm kicks in:
-The filter ``(around:100)`` gets in the given request as input exactly the railway stations
-that have been found by the preceding statement.
+З цього місця починає працювати парадигма поетапної обробки запитів:
+Фільтр ``(around:100)`` отримує результати у вигляді вхідних даних про залізничні станції,
+які було знайдено при обробці попереднього виразу.
 
 <a name="block_statements"/>
-## Block statements
+## Блокові вирази
 
-How to connect two statements by or?
-[This way](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=14&Q=%28%0A%20%20nwr%5Bpublic%5Ftransport%3Dstation%5D%28%7B%7Bbbox%7D%7D%29%3B%0A%20%20nwr%5Bshop%3Dsupermarket%5D%28%7B%7Bbbox%7D%7D%29%3B%0A%29%3B%0Aout%20center%3B) one finds all objects that are a supermarket or are a railway station:
+Як поєднати два вирази з допомогою умови OR?
+[В такий спосіб](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=14&Q=%28%0A%20%20nwr%5Bpublic%5Ftransport%3Dstation%5D%28%7B%7Bbbox%7D%7D%29%3B%0A%20%20nwr%5Bshop%3Dsupermarket%5D%28%7B%7Bbbox%7D%7D%29%3B%0A%29%3B%0Aout%20center%3B) один вираз шукає всі об'єкти які є супермаркетами, а інший залізничні станції:
 
     (
       nwr[public_transport=station]({{bbox}});
@@ -120,32 +119,32 @@ How to connect two statements by or?
     );
     out center;
 
-Here, the two _query_ statements constitute a block within a larger structure.
-Therefore, the structure marked by parentheses is called _block statement_.
+Тут два вирази _query_ складають блок у більшій структурі.
+Тому, структура взята у дужки називається _блоковим виразом_.
 
-This special block structure is called _union_
-and it serves to connect multiple statements such
-that it selects all objects that are selected by any statement within the block.
-There must be at least one statement within the block and there can be an arbitrary number.
+Така блокова структура називається _union_
+та використовується для поєднання кількох виразів. Ця структура
+отримує всі об'єкти, які запитуються будь-яким виразом з блоку.
+В блоці має бути принаймні один вираз, кількість виразів в блоці може бути довільною.
 
-There are many other block statements:
+Крім цього існують й інші блокові вирази:
 
-* The block statement _difference_ offers to cut out a selection out of another selection.
-* _if_ executes its block only if the condition in the head of _if_ evaluates to true.
-  Also, an addition block with statements can be provided that is executed if the condition evaluates to false.
-* _foreach_ executes its block once for every object in its input.
-* _for_ first combines the objects to groups and then executes its block once per group.
-* _complete_ acts in place of a _while_ loop.
-* Further block statements offer to get back deleted objects or outdated versions of objects.
+* Блокова структура _difference_ дозволяє прибрати результат одного запиту з результатів іншого запита.
+* _if_ виконує блок тільки за умови виконання умови в виконання умови в заголовку блоку _if_.
+  Також, на додачу до виразу, що виконується за виконання основної умови може бути блок, який виконується якщо основна умова отримує значення false, тобто вона не виконується.
+* _foreach_ виконує свій блок для кожного з його елементів, які отримуються на вході.
+* _for_ спочатку об'єднує об'єкти в групи, потім виконує власний блок для кожної групи.
+* _complete_ використовується замість циклу _while_.
+* Інші блокові вирази використовуються для отримання вилучених об'єктів чи колишніх версій об'єктів.
 
 <a name="evaluators"/>
-## Evaluators and Derived Elements
+## Елементи Evaluator та Derived
 
-We haven't said yet
-how to state conditions in the block statements _if_ or _for_.
+Ми поки що не розглянули як 
+зазначати умови для блокових виразів _if_ або _for_.
 
-The mechanism used for this is helpful also for other tasks.
-You can e.g. create with this [a list of all street names](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=%5Bout%3Acsv%28name%29%5D%3B%0Away%5Bhighway%5D%28%7B%7Bbbox%7D%7D%29%3B%0Afor%20%28t%5B%22name%22%5D%29%0A%7B%0A%20%20make%20Beispiel%20name%3D%5F%2Eval%3B%0A%20%20out%3B%0A%7D) within an area.
+Механізм, який використовується для цього, також корисний для інших завдань.
+Ви можете, наприклад, створити [перелік назв вулиць](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=%5Bout%3Acsv%28name%29%5D%3B%0Away%5Bhighway%5D%28%7B%7Bbbox%7D%7D%29%3B%0Afor%20%28t%5B%22name%22%5D%29%0A%7B%0A%20%20make%20Beispiel%20name%3D%5F%2Eval%3B%0A%20%20out%3B%0A%7D) в певному місці.
 
     [out:csv(name)];
     way[highway]({{bbox}});
@@ -155,33 +154,32 @@ You can e.g. create with this [a list of all street names](https://overpass-turb
       out;
     }
 
-Lines 2 and 6 contain the simple statements ``way[highway]({{bbox}})`` resp. ``out``.
-With ``[out:csv(name)]`` in line 1 the output format is controlled ([see there](../targets/index.md)).
-The lines 3, 4, and 7 constitute the block statement ``for (t["name"])``;
-it needs to know by which criterion it should group the elements.
+Рядки 2 та 6 містять прості вирази ``way[highway]({{bbox}})`` та ``out`` відповідно.
+``[out:csv(name)]`` в рядку 1 визначає формат виводу ([див тут](../targets/index.md)).
+Рядки 3, 4, та 7 утворюють блоковий вираз ``for (t["name"])``;
+потрібно знати за якими критеріями відбувається групування елементів.
 
-This is answered by the _evaluator_ ``t["name"]``.
-An _evaluator_ is an expression
-that is evaluated in the context of the execution of a statement.
+_Evaluator_ ``t["name"]`` відповідає за вибір критеріїв.
+_Evaluator_ - це вираз
+який оцінюється в контексті виконання оператора.
 
-This particular evaluator is an expression that is evaluated once per each selected object
-because _for_ needs one result for each selected object.
-The expression ``t["name"]`` evaluates for a given object the value of the tag with key _name_ of that object.
-If the object does not have a tag with key _name_
-the expression returns an empty string.
+Цей конкретний _evaluator_ є виразом, який застосовується один раз для кожного обраного об'єкта, 
+тому що для _for_ потрібен один результат для кожного обраного об'єкта.
+Вираз ``t["name"]`` оцінює наявність теґу з ключем _name_ в об'єкта.
+Якщо об'єкт не має теґа з ключем _name_
+вираз повертає порожній рядок.
 
-Line 5 also contains with ``_.val`` an _evaluator_.
-Its purpose is to generate the value that shall be printed.
-The statement _make_ always generates one object from potentially many objects.
-Therefore the value of ``_.val`` cannot depend on individual objects.
-This special expression ``_.val`` delivers within a _for_ loop the value of the expression
-for which the loop is performed.
-In this case this is the value of the tag _name_ of all here processed objects.
+Рядок 5 містить _evaluator_ ``_.val``.
+Його завдання додавати значення, яке треба повернути.
+Оператор _make_ завжди створює один об'єкт з потенційно багатьох об'єктів.
+Отже, значення ``_.val`` не може залежати від окремих об'єктів.
+Цей спеціальний вираз ``_.val`` надає значення об'єктам в залежності від виконання виразу у циклі _for_.
+В цьому випадку, значення теґу _name_ для всіх об'єктів в циклі.
 
-If an object independent value is expected, but an object dependent expression is supplied,
-then an error message is created.
-This happens for example, if we want to compute the length of all streets:
-[Please try](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=%5Bout%3Acsv%28length%2Cname%29%5D%3B%0Away%5Bhighway%5D%28%7B%7Bbbox%7D%7D%29%3B%0Afor%20%28t%5B%22name%22%5D%29%0A%7B%0A%20%20make%20Beispiel%20name%3D%5F%2Eval%2Clength%3Dlength%28%29%3B%0A%20%20out%3B%0A%7D)!
+Якщо очікується незалежне від об'єкта значення, але надається об'єктно-залежний вираз, 
+то створюється повідомлення про помилку.
+Це відбувається, наприклад, якщо ми хочемо обчислити довжину всіх вулиць:
+[Спробуйте](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=%5Bout%3Acsv%28length%2Cname%29%5D%3B%0Away%5Bhighway%5D%28%7B%7Bbbox%7D%7D%29%3B%0Afor%20%28t%5B%22name%22%5D%29%0A%7B%0A%20%20make%20Beispiel%20name%3D%5F%2Eval%2Clength%3Dlength%28%29%3B%0A%20%20out%3B%0A%7D)!
 
     [out:csv(length,name)];
     way[highway]({{bbox}});
@@ -191,9 +189,9 @@ This happens for example, if we want to compute the length of all streets:
       out;
     }
 
-The multiple segments of a street of the same name can have different lengths.
-We can fix this by providing instructions in which way the objects shall be conflated.
-Often one wants [a list](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=%5Bout%3Acsv%28length%2Cname%29%5D%3B%0Away%5Bhighway%5D%28%7B%7Bbbox%7D%7D%29%3B%0Afor%20%28t%5B%22name%22%5D%29%0A%7B%0A%20%20make%20Beispiel%20name%3D%5F%2Eval%2Clength%3Dset%28length%28%29%29%3B%0A%20%20out%3B%0A%7D):
+Кілька відрізків однойменної вулиці можуть мати різну довжину.
+Це можна виправити, надавши вказівки, яким чином потрібно об'єднати об'єкти.
+Як правило у більшості випадків потрібен [перелік](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=%5Bout%3Acsv%28length%2Cname%29%5D%3B%0Away%5Bhighway%5D%28%7B%7Bbbox%7D%7D%29%3B%0Afor%20%28t%5B%22name%22%5D%29%0A%7B%0A%20%20make%20Beispiel%20name%3D%5F%2Eval%2Clength%3Dset%28length%28%29%29%3B%0A%20%20out%3B%0A%7D):
 
     [out:csv(length,name)];
     way[highway]({{bbox}});
@@ -203,7 +201,7 @@ Often one wants [a list](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&
       out;
     }
 
-But in this particular case taking the sum [makes more sense](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=%5Bout%3Acsv%28length%2Cname%29%5D%3B%0Away%5Bhighway%5D%28%7B%7Bbbox%7D%7D%29%3B%0Afor%20%28t%5B%22name%22%5D%29%0A%7B%0A%20%20make%20Beispiel%20name%3D%5F%2Eval%2Clength%3Dsum%28length%28%29%29%3B%0A%20%20out%3B%0A%7D):
+Але в цьому конкретному випадку брати суму [більше доречно](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=%5Bout%3Acsv%28length%2Cname%29%5D%3B%0Away%5Bhighway%5D%28%7B%7Bbbox%7D%7D%29%3B%0Afor%20%28t%5B%22name%22%5D%29%0A%7B%0A%20%20make%20Beispiel%20name%3D%5F%2Eval%2Clength%3Dsum%28length%28%29%29%3B%0A%20%20out%3B%0A%7D):
 
     [out:csv(length,name)];
     way[highway]({{bbox}});
@@ -213,20 +211,20 @@ But in this particular case taking the sum [makes more sense](https://overpass-t
       out;
     }
 
-The statement _make_ creates always exactly one new object, a so-called _derived_.
-Why generate an object at all?
-Why not just take an OpenStreetMap object?
-The reasons for this vary from application to application:
-here we need something that we can print.
-In other cases one wants
-to change or remove tags from OpenStreetMap objects,
-or to simplify the geometry,
-or needs a carrier to transmit special information.
-Quasi OpenStreetMap objects would have to adhere to the rules of OpenStreetMap objects
-and do not allow for in those cases helpful degrees of freedom.
-More importantly, they could be confused with actual OpenStreetMap objects and uploaded on accident.
+Оператор _make_ завжди створює новий об'єкт, так званий _derived_.
+Навіщо взагалі генерувати об'єкт?
+Чому б просто не взяти об'єкт OpenStreetMap?
+Причина цього різняться від застосунку до застосунку:
+тут, нам потрібно щось що ми можемо повернути (надрукувати).
+В інших випадках є потреба
+змінити чи вилучити теґи у об'єктів OpenStreetMap,
+або ж є потреба в спрощенні геометрії,
+або ж нам потрібен спеціальний елемент для передачі особливої інформації.
+Квазі об'єкти OpenStreetMap мають дотримуватись правил, що застосовуються до об'єктів OpenStreetMap 
+і не дають потрібної свободи дій, потрібної в таких випадках.
+Що ще важливіше, їх можна сплутати з реальними об'єктами OpenStreetMap і випадково завантажити в базу OpenStreetMap.
 
-You can see the created objects if you [keep XML](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=way%5Bhighway%5D%28%7B%7Bbbox%7D%7D%29%3B%0Afor%20%28t%5B%22name%22%5D%29%0A%7B%0A%20%20make%20Beispiel%20name%3D%5F%2Eval%2Clength%3Dsum%28length%28%29%29%3B%0A%20%20out%3B%0A%7D) as the output format:
+Ви можете подивитись на створені об'єкти, якщо ви використовуєте [XML](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=way%5Bhighway%5D%28%7B%7Bbbox%7D%7D%29%3B%0Afor%20%28t%5B%22name%22%5D%29%0A%7B%0A%20%20make%20Beispiel%20name%3D%5F%2Eval%2Clength%3Dsum%28length%28%29%29%3B%0A%20%20out%3B%0A%7D) як вихідний формат:
 
     way[highway]({{bbox}});
     for (t["name"])
@@ -236,20 +234,18 @@ You can see the created objects if you [keep XML](https://overpass-turbo.eu/?lat
     }
 
 <a name="sets"/>
-## Multiple selections in parallel
+## Паралельні множині запити
 
-In many cases, a single selection does not suffice to solve the problem.
-Therefore, selections can also be stored in named variables
-and thus multiple selections can be kept in parallel.
+У багатьох випадках одного вибору недостатньо для розв'язання проблеми.
+Натомість результати запитів можуть зберігатись всередині іменованих змінних
+і таким чином кілька запитів можуть зберігатись паралельно.
 
-We want to find all objects of one kind
-that are not close to objects of another kind.
-Practical examples are often quality assurance,
-e.g. railway platforms distant from railways, or addresses far away from any street.
-Understanding the fine print of tagging goes beyond the scope of this section.
+Ми хочемо знайти всі об'єкти одного виду, які не є близькими до об'єктів іншого виду.
+Практичними прикладами часто є питання забезпечення якості, напр. залізничні платформи, віддалені від залізниць, або адреси які знаходяться далеко від будь-якої вулиці.
+Правила теґування виходять за межі цього розділу.
 
-Instead, we determine all supermarkets
-that are [not close to](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=14&Q=nwr%5Bpublic%5Ftransport%3Dstation%5D%28%7B%7Bbbox%7D%7D%29%2D%3E%2Eall%5Fstations%3B%0A%28%0A%20%20nwr%5Bshop%3Dsupermarket%5D%28%7B%7Bbbox%7D%7D%29%3B%0A%20%20%2D%20nwr%2E%5F%28around%2Eall%5Fstations%3A300%29%3B%0A%29%3B%0Aout%20center%3B) railway stations:
+Натомість визначимо всі супермаркети
+які [не знаходяться поруч](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=14&Q=nwr%5Bpublic%5Ftransport%3Dstation%5D%28%7B%7Bbbox%7D%7D%29%2D%3E%2Eall%5Fstations%3B%0A%28%0A%20%20nwr%5Bshop%3Dsupermarket%5D%28%7B%7Bbbox%7D%7D%29%3B%0A%20%20%2D%20nwr%2E%5F%28around%2Eall%5Fstations%3A300%29%3B%0A%29%3B%0Aout%20center%3B) із залізничними станціями:
 
     nwr[public_transport=station]({{bbox}})->.all_stations;
     (
@@ -258,53 +254,51 @@ that are [not close to](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=14&Q
     );
     out center;
 
-In line 3 the statement ``nwr[shop=supermarket]({{bbox}})`` selects all supermarkets in the bounding box.
-We want to remove a subset from these and thus we use a block statement of type _difference_;
-it can be recognized by the three components ``(`` in line 2, ``-`` in line 4, and ``)`` in line 5.
+Вираз з рядка 3 ``nwr[shop=supermarket]({{bbox}})`` знаходить всі супермаркети на видимій частині мапи.
+Нам потрібно вилучити підмножину з цього набору, тож ми використовуємо блоковий вираз типу _difference_;
+він характеризується трьома компонентами: дужка ``(`` у рядку 2, знак ``-`` в рядку 4, та дужка ``)`` в рядку 5.
 
-We must select all supermarkets close to stations.
-For this purpose, we must select all stations first,
-but we also need all supermarkets as selection.
-Therefore, we redirect the selection of all stations through the _set variable_ ``all_stations``.
-The selection is redirected in line 1 from a colloquial statement ``nwr[public_transport=station]({{bbox}})``
-by the special syntax ``->.all_stations`` into the variable in question.
-The amendment ``.all_stations`` in ``(around.all_stations:300)`` instructs the filter
-to use the variable as source instead of just the last selection.
+Нам потрібно отримати всі супермаркети поруч зі станціями.
+Для цього, спочатку відшукаємо станції,
+але нам також потрібні супермаркети.
+Тож, ми перенаправимо результат пошуку станцій до _змінної_ ``all_stations``.
+Результат рядка 1 зі звичайного виразу ``nwr[public_transport=station]({{bbox}})`` переспрямовується 
+за допомогою спеціального синтаксису ``->.all_stations`` до відповідної змінної.
+Доповнення ``.all_stations`` в ``(around.all_stations:300)`` каже фільтру
+що потрібно використовувати змінну замість результатів останнього запиту.
 
-Thereby ``nwr[shop=supermarket]({{bbox}})(around.all_stations:300)`` is the right statement
-to select exactly the supermarkets that we want to remove.
-To speed up the request, we rather use the selection of the previous statement in line 3 -
-there already are selected all supermarkets in the bounding box.
-This happens with the _filter_ ``._``.
-It restricts the selection to those objects
-that are already in the default selection at the beginning of the execution of the statement.
-Because we use the standard input here,
-we can address it by its name ``_`` (simple underscore).
+Таким чином ``nwr[shop=supermarket]({{bbox}})(around.all_stations:300)`` є тим виразом,
+який дозволяє нам отримати ті супермаркети які ми хочемо прибрати з набору.
+Для прискорення запиту, ми скористаємось результатом, який ми отримали в рядку 3 -
+у нас тут вже є всі супермаркети, що знаходяться у видимій частині мапи.
+Для цього скористаємося _фільтром_ ``._``.
+Він обмежує результати об'єктами,
+які вже є в буфері перед початком виконання виразу.
+Тому що ми використовуємо стандартний ввід,
+ми можемо звертатись до нього за його назвою ``_`` (символ підкреслювання).
 
-The flow of data during the execution of the request in full detail:
+Потік даних під час виконання запиту в деталях:
 
-* Before the begin of the execution all selections are empty.
-* Line 1 is executed.
-  Controlled by ``->.all_stations``, all stations are afterwards selected in the variable ``all_stations``,
-  and the default selection remains empty.
-* Lines 2 to 5 are a block statement of type _difference_,
-  and this block statement first executes its block of statements.
-  Thus, the next statement to execute is line 3 ``nwr[shop=supermarket]({{bbox}})``.
-  Line 3 carries no redirection,
-  hence after the execution all supermarkets are selected in the default selection.
-  The selection ``all_stations`` is not mentioned and therefore remains unchanged.
-* The block statement _difference_ copies the result of its first operand,
-  this is line 3.
-* Line 4 uses the default selection as restriction,
-  and in addition in the constraint ``(around.all_stations:300)``
-  the selection ``all_stations`` is used as the source for the reference objects.
-  The result is the new default selection and replaces the previous default selection.
-  The selection ``all_stations`` remains unchanged.
-* The block statement _difference_ copies the result of its second operand,
-  this is line 4.
-* The block statement _difference_ now calculates the difference between the two collected selections.
-  Because nothing else is specified,
-  the result becomes the new default selection.
-  The selection ``all_stations`` remains unchanged.
-* Finally, line 5 is executed.
-  Without any explicit instruction, the statement ``out`` uses as source the default selection.
+* Перед початком виконання всі результати є порожніми.
+* Виконується рядок 1.
+  Завдяки ``->.all_stations``, всі знайдені станції зберігаються до змінної ``all_stations``,
+  типовий буфер для збереження результатів залишається порожнім.
+* Рядки 2 - 5 є блоковим виразом типу _difference_,
+  і спочатку виконується ініціалізація блоку.
+  Потім, опрацьовується вираз, рядок 3, ``nwr[shop=supermarket]({{bbox}})``.
+  Рядок 3 не містить перенаправлення,
+  тож після його виконання всі супермаркети зберігаються до типового буферу.
+  Результат з ``all_stations`` не згадується, тож залишається без змін.
+* Блоковий вираз _difference_ копіює результат свого першого операнду, це рядок 3.
+* Рядок 4 використовує результат з типового буферу як обмеження,
+  на додачу до обмеження ``(around.all_stations:300)``
+  результат з ``all_stations`` використовується як джерело для пов'язаних об'єктів.
+  В результаті типовий буфер результатів перезаписується відфільтрованими даними.
+  Результат з ``all_stations`` залишається незмінним.
+* Блоковий вираз _difference_ копіює результати другого операнда, це рядок 4.
+* Блоковий вираз _difference_ тепер обраховує різницю між двома наборам.
+  Через те що більше нічого не зазначено,
+  результат обчислень записується в типовий буфер.
+  Результат з ``all_stations`` залишається незмінним.
+* І на останок, виконується рядок 5.
+  Без будь-яких явних інструкцій, оператор ``out`` виводить значення типового буферу.
