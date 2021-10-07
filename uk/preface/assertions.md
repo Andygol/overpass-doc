@@ -1,166 +1,163 @@
-Assertions
+Твердження
 ==========
 
-The Overpass API will specific tagging schemes neither promote nor hamper.
-It is intended to be backwards compatible for decades.
+API Overpass не буде просувати або заважати конкретним схемам теґування.
+Він призначений бути зворотньо сумісним впродовж десятиліть.
 
 <a name="local"/>
-## Locally Fast
+## Швидка робота для даних, розшташованих поруч
 
-The Overpass API is designed
-to be quick to deliver data that is spatially close to each other.
-Spatially disperse data can be delivered by the Overpass API as well,
-but then it has no longer any advantage over a generic database.
+Overpass API спроєктовано таким чином щоб
+швидко опрацьовувати дані, які є просторово близькими одні до одних.
+Просторово розпорошені дані також можуть отримуватися за допомогою Overpass API, 
+але тоді вони більше не мають жодних переваг над іншими базами даних.
 
-Therefore, in many places in this manual
-you will be deferred to one of the many other OpenStreetMap tools
-if it is stronger optimized for the respective purpose.
+Тому, в багатьх місцях в цим керівництві
+вас буде переадресовано до інших інструментів OpenStreetMap,
+якщо вони краще оптимізовані для відповідних цілей.
 
 <a name="faithful"/>
-## Faithful to the Data Model
+## Вірність моделі даних
 
-The data model of OpenStreetMap has, by its simplicity,
-substantially contributed to the success of OpenStreetMap.
-But for virtually every use case, one must convert the data to a different data model,
-because otherwise the processing times would be too high.
-This applies in particular to the rendering of a map and even more to routing and POI search.
+Модель даних OpenStreetMap своєю простотою 
+істотно сприяла успіху OpenStreetMap.
+Але практично для кожного випадку використання потрібно конвертувати дані в іншу модель даних,
+оскільки в іншому випадку час обробки буде надто високим.
+Це стосується, зокрема, візуалізації мапи, а ще більше - маршрутизації та пошуку POI.
 
-None of these conversions are lossless,
-every data model emphasizes some aspects, ignores other aspects and interprets the rest in the best possible way.
-Thus, even a representation that is as faithful to reality as possible
-may lead in the map, at routing and in other use cases to unexpected results.
+Жодне з цих перетворень не відбувається без певних втрат,
+кожна модель даних підкреслює деякі аспекти, ігнорує інші та інтерпретує решту в найкращий спосіб.
+Таким чином, навіть уявлення, що є максимально наближеним до дійсності,
+може спричинити до несподіваних результатів під час створення мап, прокладання маршрутів та інших випадках.
 
-Many mappers quite often address this by mis-mapping facts
-that deliver in exchange for more desired results in the tool of choice.
-The mapper rarely recognizes that the results are, that way, worse in other tools.
-This practice is referred to by the expression [(mis-)mapping for the renderer](https://wiki.openstreetmap.org/wiki/Tagging_for_the_renderer).
+Багато хто з маперів вирішує це шляхом некоректного зображення фактів,
+що в процесі роботи з ними мало б призвести до результату бажаного виду, в залежності від використаних інструментів.
+Мапери часто нехтують тим, що з використанням інших інструментів, результати можуть бути іншими, чи навіть гіршими.
+Така практика отримала власне визначення - [Мапінг під рендер](https://wiki.openstreetmap.org/wiki/Uk:Tagging_for_the_renderer).
 
-The problem is that mapping against the facts in then promoted by a pretty map appearance
-and faithful mapping is discouraged by an ugly map appearance.
-For a third party the mapper has a hard time to proof that he indeed models faithfully.
+Проблема полягає в тому, що мапінг проти правил призводить до приємнішого вигляду на мапі,
+а мапінг за правилами не завжди відповідає тому, що бажає отримати в результаті мапер.
+Маперам іноді доволі важко довести стороннім особам, що вони дотримуються правил.
 
-Therefore, the Overpass API operates on the original data model:
-It is precisely the mission of the Overpass API to show the data as it is modeled in OpenStreetMap.
+Тому API Overpass працює спираючись на оригінальну модель даних.
+Саме в цьому полягає місія Overpass API - показувати дані так, як вони є в OpenStreetMap.
 
-This shifts the burden:
-actually faultily modeled data can be demonstrated to be flawed.
-For faithfully modeled data, it can be verified,
-and it at least can be shown the full context.
+Своєю чергою це знімає тягар з Overpass API,
+дані, які були додані проти правил, можна демонструвати саме як недоліки.
+Дані, додані за всіма правилами, можна перевірити,
+та принаймні показати їх повний контекст.
 
 <a name="tags"/>
-## Tagging Neutrality
+## Нейтралітет що до теґування
 
-It is a trait of mankind that quickly occurs the opposite phenomenon:
-Prophets pop up to spread the doctrine they believe were immaculate.
+Рисою людства, яка швидко набуває зворотного явища, є те, що
+з'являються пророки, що поширюють вчення, яке, на їхню думку, є непорочним.
 
-An example is multipolygons:
-The problems to solve are
-to model on the one hand areas with holes
-and on the other hand areas that intrinsically and actually touch each other.
-E.g. countries fill the complete landmass, i.e. any border is always the border of multiple countries.
-To model that with closed ways only is not possible.
+Наприклад мультиполігони.
+Проблемою, яку вони були покликані вирішити, 
+з одного боку, був мапінг полігонів з отворами в середині,
+з іншого боку, мапінг суміжних полігонів, які торкаються один одного.
+Наприклад, країни займають певну територію та мають кордони з іншими країнами, сухопутні кордони - це завжди кордон що належить країнам, які він розділяє.
+Для мапінгу кордонів країн використання тільки замкнених ліній більше не можливе.
 
-From the use case _holes_ the convention remained
-that the tags are placed on the outer ring way.
-This largely came from that the renderer had difficulties with relations.
-Concurrently, some users have difficulties with certain particularities,
-and that repeatedly has been an issue under the headline _touching inner rings_.
+З моменту початку мапінгу _отворів_ (до появи мультиполігонів) 
+теґи об'єкта додавались на зовнішній контур.
+Це було зроблено, через те, що рендери мали проблеми з обробкою зв'язків.
+Одночасно у деяких користувачів виникали певні труднощі,
+які можна поєднати в одну категорію - _дотичні внутрішні контури_.
 
-In total, multipolygon relations are a recurring subject
-and editing them still requires good knowledge.
+В цілому, тема мультиполігонів часто повторюється
+і їх використання все ще вимагає відповідного досвіду.
 
-Some mappers have misunderstood this
-such that multipolygon relations were the somewhat more mighty object,
-and they have converted simple ways to multipolygons.
-But this does not have any benefit
-and both hampers the editing and bloats the database.
+Дехто з маперів отримали хибне уявлення про них,
+ніби мультиполігони це дещо могутнє,
+і перетворили прості лінії у мультиполігони.
+Але це не дало жодних переваг,
+натомість ускладнює редагування та перенавантажує базу даних.
 
-There are many controversies in other subjects:
+В інших темах також є багато суперечок:
 
-* Footway in parallel to carriageways can be modeled as separate ways,
-  or they can be by a complex system of rules represented by tags on the carriageway
-  or one can restrict implicit modeling to simple cases with no potential to misunderstandings.
-* In streets either all parts of the street can get a name.
-  Or one restricts the name to at most one carriageway per direction of the method of transport with highest speed.
-* In buildings with shops the shop can be the same object as the building or just a node in the building.
-  The address can be mapped on only one of the two objects or on both.
+* Тротуари, що йдуть паралельно до проїжджої частини можуть показуватись окремими лініями,
+  або за допомогою складних правил вони зазначаються на лінії дороги,
+  чи можна обмежити неявне моделювання лише простими випадками, без потенційного непорозуміння.
+* У випадку з вулицями, назву може отримати будь-яка частина вулиці.
+  Або назва додається принаймні до однієї з проїжджих частин в кожному напрямку, там де найвища швидкість рух.
+* У випадку з магазинами. Чи магазин тотожний будівлі, чи він має позначатись окремою точкою в середині будівлі?
+  Адресу варто зазначати на одному з двох об'єктів (будівлі та магазині), чи тільки на одному?
 
-To ensure that I create a universally useful tool
-I keep it out of such dissents as much as possible.
+Щоб бути впевненим, що Overpass API є універсальним та корисним інструментом,
+він був створений щоб стояти обабіч від цих розбіжностей.
 
-For this reason the Overpass API is strictly tagging neutral,
-i.e. no tag gets special treatment.
+З цих причин Overpass API дотримується нейтралітету, щодо схем теґування,
+тобто жоден теґ не має якогось особливого трактування.
 
 <a name="antiwar"/>
-## Immutability
+## Незмінність
 
-Another problem in this context is the ambition
-to automatically change the data.
-Although the idea sounds compelling,
-it causes [many problems](https://2016.stateofthemap.org/2016/staying-on-the-right-side-best-practices-in-editing/).
+Іншою проблемою в цьому контексті є прагнення
+щодо автоматичних змін даних.
+Хоча ідея звучить переконливо,
+це може призвести до [багатьох проблем](https://2016.stateofthemap.org/2016/staying-on-the-right-side-best-practices-in-editing/).
 
-For this reason the Overpass API does not support
-to rewrite OpenStreetMap objects on the fly.
-For the clearly existing and clearly justified need
-to rewrite objects
-the class of _deriveds_ has been introduced.
-These are sufficiently different from OpenStreetMap objects
-such that they cannot be directly written back.
+Через це Overpass API не підтримує
+перезаписування об'єктів OpenStreetMap на ходу.
+Для чітко існуючої та обґрунтованої потреби
+переписувати об'єкти було введено клас _derived_ .
+Об'єкти цього класу досить сильно відрізняються від об'єктів OpenStreetMap
+щоб їх неможливо було записати назад в базу OpenStreetMap.
 
-Edits with various degrees of automation can still profit from the Overpass API.
-Examples of this can be found in the section [JOSM](../targets/index.md).
+Редагування з певною мірою автоматизації можуть існувати внаслідок роботи Overpass API.
+Приклади можна знайти в розділі присвяченому [JOSM](../targets/index.md).
 
 <a name="ql"/>
-## Versatile Query Language
+## Універсальна мова запитів
 
-Geodata bears its own intrinsic ordering criterion by _spatial proximity_.
-For this reason they do not fit in any category
-that is catered for by any well established query language.
-For this reason Overpass API at all brings its own query language.
+Геодані мають свій власний критерій внутрішнього впорядкування за _просторовою близькістю_.
+З цієї причини вони не належать до жодної категорії
+які обслуговуються будь-якою усталеною мовою запитів.
+З цієї причини Overpass API взагалі пропонує власну мову запитів.
 
-The query language is not only geared to use spatial proximity,
-but can also accommodate for all of the particularities of the OpenStreetMap data model.
-It is also crafted to ensure
-that queries behave sane and nice on a publicly shared server,
-i.e. neither huge attack surfaces exist, nor performance problems shall occur.
+Мова запитів призначена не лише для використання просторової близькості,
+але також може враховувати всі особливості моделі даних OpenStreetMap.
+Вона створена для того, щоб забезпечити
+нормальну роботу запитів на публічно доступних серверах,
+також щоб не піддавати сервери зайвому навантаженню, та не створювати проблем з безпекою даних.
 
-Finally, it turned out
-that the OpenStreetMap community wants and profits from well complex searches.
-They are catered for
-by making the language as logically rigid and orthogonal as possible
-such that nearly anything can be combined with anything.
+Нарешті виявилося, що спільнота OpenStreetMap хоче та отримує зиск від достатньо складних запитів.
+Вони обслуговуються завдяки тому, що
+мова є максимально логічно жорсткою та ортогональною,
+тож практично все можна поєднати з чим завгодно.
 
 <a name="infrastructure"/>
-## Infrastructure
+## Інфраструктура
 
-The Overpass API is designed to be infrastructure.
-Thus, it is neither an end user software, nor a prototype.
+Overpass API розроблено як інфраструктуру.
+Таким чином, це не є ні програмним забезпеченням для кінцевого користувача, ні прототипом.
 
-Decisions on interfaces, in particular regarding the query language,
-and over required dependencies are likely to have an impact for decades.
-For this reason, alterations are introduced cautiously
-and not before a form is found that can persist in the long run.
+Рішення щодо інтерфейсів, зокрема щодо мови запитів,
+і більше необхідних залежностей, ймовірно, матимуть вплив протягом десятиліть.
+Тому зміни вносяться обережно
+і не раніше, ніж буде знайдено форму, яка може зберігатися в довгостроковій перспективі.
 
-To be an infrastructure connected to the internet means
-one must retain a sane load management even in the face of insane patterns of requests.
-More on this in the [next section](commons.md#magnitudes).
+Бути інфраструктурою, підключеною до Інтернету, означає, що
+потрібно зберігати розумне управління навантаженням навіть перед шаленим напором запитів.
+Більше про це в [наступному розділі](commons.md#magnitudes).
 
 <a name="libre"/>
-## Free and Open
+## Відкритість та Свобода
 
-The Overpass API shall be held against the [four freedoms](https://www.gnu.org/philosophy/free-sw.html) of open source.
+Overpass API слідує [чотирьом свободам](https://www.gnu.org/philosophy/free-sw.html) відкритого програмного забезпечення.
 
-### Execute, Distribute
+### Користування, Розповсюдження
 
-For this aim it does not suffice to offer the public instances,
-because they have inevitably finite capacity.
+Для цієї мети недостатньо запропонувати публічні екземпляри,
+тому що вони неминуче матимуть обмежену продуктивність.
 
-Only with the publication of the [source code](https://github.com/drolbr/Overpass-API) in a form
-that makes the [installation of independent instances](https://dev.overpass-api.de/no_frills.html) simple
-the freedoms are warranted.
-This includes designing the software such that eligible hardware is easy to obtain.
+Тільки через розповсюдження [сирців](https://github.com/drolbr/Overpass-API) у вигляді, що 
+дозволяє [встановити їх на незалежному обладнанні](https://dev.overpass-api.de/no_frills.html) забезпечує свободу користування.
+Це включає розробку програмного забезпечення таким чином, щоб до відповідно обладнання було легко мати доступ.
 
-### Adapt, Modify
+### Адаптація, Модифікація
 
-Here the [source code](https://github.com/drolbr/Overpass-API) is the essential ingredient.
-The [license](https://github.com/drolbr/Overpass-API/blob/master/COPYING) caters for the legal side.
+[Сирці](https://github.com/drolbr/Overpass-API) – основний інгредієнт.
+[Ліцензія](https://github.com/drolbr/Overpass-API/blob/master/COPYING) відповідає за юридичний бік.
