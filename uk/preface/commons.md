@@ -1,174 +1,173 @@
-Commons
-=======
+Загальне
+========
 
-The public instances await your queries.
-They offer as much resources as possible,
-but they also defend themselves against overuse.
-Heavy users easily can set up their own instance.
+Публічно доступні екзепляри чекають на ваші запити.
+Вони пропонуть достатню кількість ресурсів, що є у них в наявності,
+але вони захищені від надмірного навантаження.
+Користувачі, що потребують значних обчислень, можуть розгрнути власний екземпляр API.
 
 <a name="magnitudes"/>
-## Magnitudes
+## Навантаження
 
-The mission of the public instances
-is to be available to as many users as possible.
-The computational power currently has to be shared between the roundabout 30'000 daily users.
+Місією публічних екземплярів бути доступними для великої кількості користувачів.
+На поточний момент обчислювальні потужності розподіляються серед 30 тис. користувачів щодня.
 
-The typical request has a run time of less than 1 second,
-but there are also requests than run for much longer.
-Each of the Overpass API servers can fulfill about 1 million requests per day,
-and two servers listen on the address [overpass-api.de](https://wiki.openstreetmap.org/wiki/Overpass_API#Public_Overpass_API_instances).
+Типовий запит виконується менше ніж за 1 секунду,
+але є запити, які виконуються значно довше.
+Кожен з серверів Overpass API може задовольнити близько 1 мільйона запитів на день,
+і два сервери знаходяться за адресою [overpass-api.de](https://wiki.openstreetmap.org/wiki/Overpass_API#Public_Overpass_API_instances).
 
-It is extremely unlikely that you will ever cause problems with manually put requests.
-Unfortunately, you may still run into load shedding - the quota algorithm is not perfect.
+Надзвичайно малоймовірно, що ви коли-небудь будете створювати проблеми з запитами поданими вручну.
+На жаль, ви все ще можете зіткнутися із захистом від навантажень - алгоритм квот не ідеальний.
 
-Examples of problematic behaviour:
+Приклади проблемної поведінки:
 
-1. Tens of thousands of times a day sending the same request (from the same address)
-2. Asking for individual OSM elements one by one millions of times.
-3. Stiching bounding boxes to scrape the full data of the complete world.
-4. Setting up an app for more than just OSM mappers
-   and relying on the public instances as backend.
+1. Десятки тисяч разів на день надсилання одного і того ж запиту (з однієї адреси)
+2. Надсилання запитів про окремі елементи OSM один за одним мільйони разів.
+3. Робити запит для всього світу з метою отримати всі дані.
+4. Створення застосунків не лише для маперів,
+   використовуючи публічні сервери у якості бекенду вашого комерційного сервісу.
 
-In the first case, the querying script needs to be fixed.
-In the cases 2 and 3, one better ought use a [planet dump](https://wiki.openstreetmap.org/wiki/Planet.osm) instead of the Overpass API.
-In the last cast, only running your own instance sustainably serves your mission.
-Setting up your own instance is subject of a [dedicated section](../more_info/setup.md).
+В першому випадку вам потрібно виправити ваш запит.
+У випадках 2 та 3 краще звернутись за даними до [дампу планети](https://wiki.openstreetmap.org/wiki/Planet.osm) ніж до Overpass API.
+В останньому випадку, лише розгортання власного екземпляра дозволить вам надавати ваші послуги безперебійно.
+Розгортання власного екземпляра є темою [окремого розділу](../more_info/setup.md).
 
-In fact, the most users pose only a few requests.
-The automatic load shedding thus aims
-to give the first few requests per user precedence over the then numerous requests of heavy users.
-A manual load shedding therefore will start with the most heavy users
-and the following estimations for maximum use give us a broad safety margin.
+Насправді більшість користувачів надсилають лише кілька запитів.
+Автоматичні процедури керування навантаженням на сервер
+надають найвищий пріоритет кільком першим запитам користувачів перед запитами, що надсилаються іншими.
+Ручне керування також може мати місце для тих, хто надмірно навантажує сервери запитами
+і наступні припущення про максимальні навантаження дають певний простір у підтримані роботи серверів.
 
-It can be performed by the public servers for heavy users an amount of requests
-that neither surpasses 10000 requests per day nor 1 GB as the total download volume.
+Ручне керування може бути запроваджене для користувачів кількість запитів яких
+наближається до 10000 на день або обсяг даних для завантаження наближається до 1 Гб.
 
-Amongst the expressed goals of the Overpass API project is to make running your own instance really simple.
-If you expect a higher demand than the above sketched usage limits,
-then please read the [installation instructions](../more_info/setup.md).
+Серед цілей декларованих проєктом Overpass API - спрощення запуску вашого власного екземпляра Overpass API.
+Якщо очікувані потреби перевищують описані виші вимоги,
+зважте на [розгортання власного екземпляра Overpass API](../more_info/setup.md).
 
-If you are rather interested in the rules of the automatic load shedding
-then please read the following section.
+Якщо вас цікавлять правила автоматичного регулювання навантаження
+тоді, будь ласка, прочитайте наступний розділ.
 
 <a name="quotas"/>
-## Quotas
+## Квоти
 
-The automatic load shedding keeps track which (anonymized) user puts which request
-and assures that moderate users still can access the service
-if the total volume of requests exceeds server capacity.
+Процеси автоматичного регулювання навантаження (анонімізовано) відстежують
+коли та які запити користувач надсилає
+та оцінюють, чи користувачі які створюють помірне навантаження все ще мають доступ до сервера,
+якщо загальна кількість запитів наближається до пікових можливостей сервера.
 
-There are currently two independent public instances,
-[z.overpass-api.de](https://z.overpass-api.de/api/status) and [lz4.overpass-api.de](https://lz4.overpass-api.de/api/status).
-We start with the explanation of and with the help of the status request.
+Зараз працюють два незалежних публічних екземпляри,
+[z.overpass-api.de](https://z.overpass-api.de/api/status) та [lz4.overpass-api.de](https://lz4.overpass-api.de/api/status).
+Розпочнемо пояснення квот з допомогою відстеження станів запитів.
 
-### Rate Limit
+### Обмеження запитів
 
-Requests usually are assigned by taking the IP address as the user.
-If a user key is in the request, then it overrides the IP address.
-For IPv4 addresses, the full address is evaluated.
-For IPv6 addresses, currently the upper 64 bits of the IP address are evaluated.
-Since it is still unclear which customs with address blocks become usual,
-I may decide to take fewer leading bits into account in the future.
-The user number calculated by the server is always in the first line of the [status request](https://overpass-api.de/api/status) behind ``Connected as:``.
+Запит, зазвичай асоціюється з користувачем за IP адресою.
+Якщо ідентифікатор користувача міститься в запиті, використовується він замісць IP.
+Для адрес IPv4 оцінюється повна адреса.
+Для адрес IPv6 - тільки перші 64 біти адреси.
+Оскільки досі не зрозуміло, які блоки адреси будуть звичайними
+кілька додаткових блоків адреси можуть бути додані згодом.
+Ідентифікатор користувача визначається сервером і завжди показується в [запиті стану](https://overpass-api.de/api/status) в рядку ``Connected as:``.
 
-Every execution of a request occupies one of the slots available to the user,
-in particular for the full actual execution time plus a cool down time.
-The purpose of the cool down time is
-to give other users a chance to pose a request.
-The cool down time grows with the load of the server and proportionate to the execution time.
-During moments of low load the cool down time is just a fraction of the execution time,
-during moments of high load the cool down time can be a multiple of the execution time.
+Виконання кожного запиту вимагає одного виділеного слоту для користувача,
+повний фактичний час виконання також включає час "охолодження".
+Час на "холодження" потрібен, щоб
+дати можливість іншим користувачам надіслати власні запити.
+Час на "охолодження" зростає одночасно з ростом навантаження на сервер і є пропорційним часу виконання запиту.
+За невеликого навантаження на сервер час охолодження може бути лише часткою від часу виконання.
+З ростом навантаження час охолодження стає в кілька разів довшим за час виконання запиту.
 
-A slippy map causes many short running requests in a short time.
-To ensure that a user gets served all these requests
-there are two mechanisms of goodwill:
+Рух мапи призводить до створення досить коротких запитів в продовж невеликого проміжку часу.
+Для того, щоб бути впевненими що всі запити користувачів будуть виконані
+застосовуються наступні механізми:
 
-* Multiple slots are made available to users.
-  The number of available slots is written in line 3 after ``Rate limit:``.
-* Requests stay enqueued up to 15 seconds on the server
-  if not yet a slot is available to them.
+* Кожен користувач отримує кілька слотів.
+  Кількість доступних слотів зазначається в рядку після ``Rate limit:``.
+* Запити залишаються в черзі впродовж 15 секунд,
+  якщо у вас немає вільних слотів для їх виконання.
 
-An example: if such a slippy map submits 20 requests of 1 second run time,
-and if the number of slots is 2 and the ratio of run time to cool down time is 1-by-1,
-then
+Наприклад: якщо рух мапи створює 20 запитів на виконання яких вимагається 1 секунда серверного часу,
+а доступних слотів 2 та ліміт на виконання запитів та час на "охолодження" - 1 до 1, тоді
 
-* the first two requests are processed immediately
-* the next two requests are accepted,
-  then processed with a delay of 2 seconds (1 second execution time plus 1 second cool down time)
-* further requests are executed respectively later
-* the requests 15 and 16 are executed after a delay of 14 seconds
-* the requests 17 to 20 are discarded after 15 seconds
-  because they have not secured a slot early enough
+* перші два запити виконуються миттєво
+* наступні два запити отримуються
+  та виконуються із затримкою у 2 секунди (1 сек - час виконання, 1 сек - час охолодження)
+* наступні запити виконуються з відповідною затримкою
+* запити 15 та 16 будуть виконані після 14 сек затримки
+* запити з 17 по 20 будуть відкинуть після 15 сек очікування
+  через відсутність зарезервованих раніше слотів для їх виконання.
 
-If the user still needs the content of the requests 17 to 20
-(and not has already panned to a different place)
-then the client framework shall resubmit the requests after the 15 seconds.
-There is a reference implementation in the [section about OpenLayers and Leaflet](../targets/index.md).
+Якщо клієнт все ще потребує результатів запитів 17-20
+(та не переміщав мапу в інше місце)
+тоді платформа клієнта має наново направити ці запити через 15 секунд.
+Ознайомтесь з розділом [про OpenLayers and Leaflet](../targets/index.md), щоб дізнатись як це зробити.
 
-The reason for this mechanism is scripts in an inifinite loop:
-many of them submit multiple requests in parallel and are delayed by that mechanism in a meaningful way,
-because they get responses including refusals appropriately delayed.
+Причиною впровадження такого захисту є скрипти в нескінченому циклі,
+багато з них надсилають кілька запитів паралельно, які відкладаються цим механізмом,
+через затримку виконання, вони отримують повідомлення про відмову з відповідною затримкою.
 
-If runaway or long running requests in the order of many minutes have occupied a slot,
-then the status response indicates from line 6 on
-which slot is going to be available again at which time.
+Якщо запит виконується впродовж значного часу, займаючи відповідний слот для цього,
+інформація про це буде зазначено в рядку 6 звіту,
+також буде зазначено, як швидко ви зможете скористатись цим слотом знову.
 
-Requests that are denied due to the rate limit are answered with the [HTTP status code 429](https://tools.ietf.org/html/rfc6585#section-4).
+Запити, які відхилені через перевищення доступних слотів отримують відповідь сервера - [HTTP status code 429](https://tools.ietf.org/html/rfc6585#section-4).
 
-### Timeout and Maxsize
+### Timeout та Maxsize
 
-Independent of the rate limit, there is a second mechanism.
-This mechanism prioritizes small requests over large requests,
-to ensure that many users with small requests can still be served
-if the demand of the largest users would already exceed the capacity of the server.
+Незалежно від  виділених слотів існує й інший механізм.
+Він надає перевагу виконанню невеличких запитів перед великими, масивними запитами,
+щоб надати можливість користувачам з невеликими запитами отримати відповіді на них,
+навіть коли великі запити майже вичерпали всі можливості сервера.
 
-There are two criteria for this, per run time and per maximum used RAM.
-Each request contains a declaration of its expected maximum run time and expected maximum memory usage.
-The declaration of maximum run time can be made explicit by prepending the request with a ``[timeout:...]``;
-the declaration of maximum memory usage can be made explicit by prepending the request with a ``[maxsize:...]``.
-Both can be combined.
+Для цього використовуються критерії по часу виконання запиту та максимально використаного обсягу оперативної пам'яті сервера.
+Кожен запит містить оголошення про очікуваний максимальний час виконання та використання пам'яті.
+Оголошення про очікуваний максимальний час виконання може зазначатись явним чином з використанням ``[timeout:...]`` на початку тексту запиту;
+оголошення про максимальний обсяг використання пам'яті також можна зробити явним чином, додавши на початку тексту запиту ``[maxsize:...]``.
+Ці оголошення можна використовувати разом.
 
-If no maximum run time is declared then a default limit of 180 seconds applies.
-For the maximum memory usage, the default value is 512 MiB.
+Якщо не оголошено максимальний час виконання запиту, застосовується типове обмеження у 180 секунд.
+Типове обмеження максимального обсягу пам'яті складає 512 MiB.
 
-If a request exceeds during execution its maximum run time or maximum memory limit,
-then it is aborted by the server.
-This [example](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=10&Q=%5Btimeout%3A3%5D%3B%0Anwr%5Bshop%3Dsupermarket%5D%28%7B%7Bbbox%7D%7D%29%3B%0Aout%20center%3B) stops after 3 seconds:
+Якщо час виконання запиту перевищує максимальний час або обсяги виділеної пам'яті,
+сервер припиняє його обробку.
+Виконання цього [запиту](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=10&Q=%5Btimeout%3A3%5D%3B%0Anwr%5Bshop%3Dsupermarket%5D%28%7B%7Bbbox%7D%7D%29%3B%0Aout%20center%3B) завершиться після 3 секунд його обробки:
 
     [timeout:3];
     nwr[shop=supermarket]({{bbox}});
     out center;
 
-The [same example with more run time](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=10&Q=%5Btimeout%3A90%5D%3B%0Anwr%5Bshop%3Dsupermarket%5D%28%7B%7Bbbox%7D%7D%29%3B%0Aout%20center%3B) passes:
+[Той самий запит, але з більшим часом на виконання](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=10&Q=%5Btimeout%3A90%5D%3B%0Anwr%5Bshop%3Dsupermarket%5D%28%7B%7Bbbox%7D%7D%29%3B%0Aout%20center%3B) відпрацьовує як треба:
 
     [timeout:90];
     nwr[shop=supermarket]({{bbox}});
     out center;
 
-Back to the quotas:
-The server admits a request if and only if
-it is going to use in both criteria at most half of the remaining available resources.
-For the maximum accepted memory usage the value is currently 12 GiB.
-If at the moment 8 requests with 512 MiB limit each are running,
-then 4 GiB are used.
-A further request is going to be admitted if and only if
-it promises to use at most 4 GiB.
-With this ninth request coming in addition,
-there are still 4 GiB available,
-and then a further request is only up to a promised size of 2 GiB accepted.
+Повернемося до квот:
+Сервер приймає запит тоді і тільки тоді, коли
+він може застосувати обидва критерії і вони не будуть
+перевищувати половину вільних ресурсів сервера.
+Для максимального прийнятного обсягу пам'яті наразі значення становить 12 ГіБ.
+Якщо в момент надсилання запиту виконуються інші 8 запитів, кожен з яких потребує 512 МіБ,
+на сервері під їх виконання резервується 4 ГіБ оперативної пам'яті.
+Наступні запити будуть прийняті до виконання якщо вони обіцяють використовувати 
+не більше ніж 4 ГіБ (половину від наявного залишку пам'яті 12 - 4 = 8 ГіБ).
+Виконуючи дев'ять запитів одночасно сервер матиме доступними 4 ГіБ
+та наступний запит із потребами в використанні пам'яті меншими за 2 ГіБ будуть прийняті в роботу.
 
-For the maximum run time the system behaves accordingly:
-the currently common server limit is 262144 seconds.
-This means that one request with a maximum run time of up to 1 day is accepted almost always,
-but then every further request with such a long run time would be declined.
-The rate limit mechanism with an accordingly long cool down time ensures
-that not always the same user can profit from an extremely long run time.
+З зазначенням максимального часу роботи запиту система поводиться відповідно:
+на поточний момент середній ліміт складає 262144 секунд.
+Це означає, що майже завжди буде прийнято в роботу один запит із максимальним часом виконання до 1 дня,
+але тоді кожен наступний запит з таким тривалим часом виконання буде відхилено.
+Механізм обмеження навантаження з відповідно великим часом охолодження гарантує,
+що не завжди один і той же користувач може отримати зиск від надзвичайно тривалих запитів.
 
-Like with the rate limit, the server does not immediately deny requests,
-but waits for 15 seconds
-whether in the meantime sufficiently many other requests have been finished.
+Як і з обмеженням швидкості, сервер не відразу відхиляє запити,
+але чекає 15 секунд
+чого має вистачити на виконання інших запитів.
 
-The load from the server's perspective is made public by Munin,
-[here](https://z.overpass-api.de/munin/localdomain/localhost.localdomain/index.html#other) and [here](https://lz4.overpass-api.de/munin/localdomain/localhost.localdomain/index.html#other).
+Ви можете подивитись статистику навантаження на сервери 
+[тут](https://z.overpass-api.de/munin/localdomain/localhost.localdomain/index.html#other) та [тут](https://lz4.overpass-api.de/munin/localdomain/localhost.localdomain/index.html#other).
 
-Requests that have been denied due to this resource mismatch are answered with an [HTTP status code 504](https://tools.ietf.org/html/rfc7231#section-6.6.5).
+На запити, відхилені з допомогою механізму обмеження навантаження, надходять відповіді з [HTTP status code 504](https://tools.ietf.org/html/rfc7231#section-6.6.5).
