@@ -1,119 +1,119 @@
-Data Formats
-============
+Формати даних
+=============
 
-There are multiple data formats to carry OpenStreetMap data.
-We present all that have an immediate application.
+Для обміну даними OpenStreetMap існує кілька форматів даних.
+Тут ви знайдете більшість з них з готовими до застосування рецептами.
 
 <a name="scope"/>
-## Scope
+## Область застосування
 
-The data types have already been introduced in the [corresponding section of the preface](../preface/osm_data_model.md).
-Thus, you should already know _nodes_, _ways_, and _relations_ here.
+Про типи даних вже була згадка у відповідному [розділі](../preface/osm_data_model.md) у Вступі.
+Отже, ви вже знаєте про _node_, _way_ та _relation_.
 
-The frequent problem how to complete the geometry of OpenStreetMap objects
-is addressed in [the section about geometries](../full_data/osm_types.md) in the chapter [Spatial Data Selection](../full_data/index.md).
+Доволі частою проблемою є отримання геометрії об'єктів OpenStreetMap,
+її розв'язання розглядається в [розділі про геометрію об'єктів](../full_data/osm_types.md) в главі [Отримання просторових даних](../full_data/index.md).
 
 <a name="faithful"/>
-## Traditional Degrees of Detail
+## Традиційні ступені деталізації
 
-We start with the degrees of detail:
-While the general output format is controlled by a per request global setting,
-the degrees of detail are controlled per output statement by its respective parameters.
-That way it is possible to mix multiple degrees of detail in a single request.
-This capability is needed to get an optimal amount of data for [some geometry variants](../full_data/osm_types.md#full).
-In addition, the respectively best output mode is told at each [application](index.md).
+Почнемо зі ступенів деталізації:
+хоча загальний формат виводу контролюється глобальним налаштуванням для кожного запиту,
+ступінь деталізації виводу встановлюється для кожного виразу відповідними параметрами.
+Таким чином в одному запиті можна поєднувати різний ступінь деталізації для його частин.
+Це можливість потрібна для отримання оптимального обсягу даних для [деяких варіантів геометрії](../full_data/osm_types.md#full).
+На додачу, кожен [застосунок](index.md) отримує інформацію про найкращий спосіб виводу даних.
 
-We present for each degree of detail an example around the suburb Greenwich in London.
-All examples are crafted to return rather few nodes, ways, and relations
-to facilitate to inspect the data in the tab _Data_ of Overpass Turbo.
+Розглянемо кожен ступінь деталізації на прикладі передмістя Гринвіч у Лондоні.
+Усі приклади створені таким чином, щоб повернути досить невелику кількість точок, ліній та зв'язків
+для їх перегляду у вкладці _Data_ в Overpass Turbo.
 
-For the original degrees of detail of OpenStreetMap there is a hierarchy to turn them on:
+Для початкових ступенів деталізації OpenStreetMap існує ієрархія їх використання:
 
-The statement _out ids_ [delivers](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB):
+Вираз _out ids_ [поверне](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB):
 
     ( way(51.477,-0.001,51.478,0.001)[name="Blackheath Avenue"];
       node(w);
       relation(51.477,-0.001,51.478,0.001); );
     out ids;
 
-* the ids of the objects
+* ідентифікатори об'єктів
 
-The statement _out skel_ [delivers](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB) in addition the necessary information
-to reconstruct the geometry:
+Вираз _out skel_ [поверне](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB), на додачу до основних даних, дані потрібні для відновлення геометрії:
 
     ( way(51.477,-0.001,51.478,0.001)[name="Blackheath Avenue"];
       node(w);
       relation(51.477,-0.001,51.478,0.001); );
     out skel;
 
-* for nodes their coordinates
-* for ways and relations their lists of their members
+* для точок - їх координати
+* для ліній та зв'язків - перелік їх членів
 
-The statement _out_ (without a flag) [delivers](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB) the complete geodata, i.e. in addition:
+Вираз _out_ (без параметрів) [поверне](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB) повні геодані на додачу до:
 
     ( way(51.477,-0.001,51.478,0.001)[name="Blackheath Avenue"];
       node(w);
       relation(51.477,-0.001,51.478,0.001); );
     out;
 
-* the tags of all objects
+* теґів всіх об'єктів
 
-The statement _out meta_ [delivers](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB) in addition:
+Вираз _out meta_ [поверне](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB) на додачу:
 
     ( way(51.477,-0.001,51.478,0.001)[name="Blackheath Avenue"];
       node(w);
       relation(51.477,-0.001,51.478,0.001); );
     out meta;
 
-* the versions of the objects
-* the timestamps of the objects
+* версії об'єктів
+* та відбитки часу
 
-Finally, the statement _out attribution_ delivers the following data:
+Нарешті, вираз _out attribution_ повертає наступні дані:
 
-* the changeset id
-* the user id
-* the current username for this user id
+* id набору змін
+* id мапера
+* та призвісько мапера, що пов'язане з id
 
-This last degree of detail acts on data
-that falls, with regard to the dominant societal consensus, into privacy concerns.
-For this reason there is [a barrier](../analysis/index.md) to obtain that data.
-As none of this data is necessary for the applications discussed in this chapter,
-we refrain from an example here.
+Ця остання ступінь деталізації даних підпадає,
+відповідно до прийнятих в спільноті домовленостей,
+до розряду питань конфіденційності.
+Тому тут існують певні [перепони](../analysis/index.md) на шляху отримання цих даних.
+Оскільки жодні з цих даних не потрібні для випадків, які розглядаються у цьому розділі,
+ми утримуємось від наведення прикладу тут.
 
 <a name="extras"/>
-## Additional Data
+## Додаткові дані
 
-It is possible to amend the output by three different amounts of geometry data.
-Any combination between the just presented degrees of detail and the extra geometry is possible.
+У вас є можливість зробити вивід трьома різними способами для отримання даних про геометрію.
+Можливі будь-які комбінації між наведеними рівнями деталізації.
 
-The flag _center_ triggers the addition of one coordinate per object.
-This coordinate does not have a sophisticated mathematical meaning,
-but is just in the middle of the bounding box that encloses the object:
-[example 1](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
+Параметр _center_ використовується для виводу координат центру кожного об'єкта,
+Ці координати не мають будь-якого складного математичного значення,
+вони показують середину прямокутника, який можна окреслити навколо кожного об'єкта: 
+[приклад 1](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
 
     ( way(51.477,-0.001,51.478,0.001)[name="Blackheath Avenue"];
       node(w);
       relation(51.477,-0.001,51.478,0.001); );
     out ids center;
 
-[example 2](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
+[приклад 2](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
 
     ( way(51.477,-0.001,51.478,0.001)[name="Blackheath Avenue"];
       node(w);
       relation(51.477,-0.001,51.478,0.001); );
     out center;
 
-The flag _bb_ (for _bounding box_) triggers the addition of the bounding box for each way and relation:
-[example](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
+Параметр _bb_ (_bounding box_) використовується для показу прямокутників, що містять кожну лінію чи зв'язок:
+[приклад](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
 
     ( way(51.477,-0.001,51.478,0.001)[name="Blackheath Avenue"];
       node(w);
       relation(51.477,-0.001,51.478,0.001); );
     out ids bb;
 
-The flag _geom_ (for _geometry_) amends the ways and relations with coordinates.
-For this to work, the degree of detail must be at least _skel_,
-and it works up to _attribution_:
+Параметр _geom_ (_geometry_) долучає до ліній та зв'язків координати точок з яких вони складаються.
+Для цього рівень деталізації має бути принаймні _skel_,
+він працює й для інших до _attribution_ включно:
 [example](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
 
     ( way(51.477,-0.001,51.478,0.001)[name="Blackheath Avenue"];
@@ -121,21 +121,21 @@ and it works up to _attribution_:
       relation(51.477,-0.001,51.478,0.001); );
     out skel geom;
 
-Now we received not only some hundred meters from a park nearby Greenwich,
-but several hundred kilometers footways in eastern England.
-This is a general problem of relations.
-As a remedy, a bounding box also for the output command can be set, [see here](../full_data/bbox.md#crop).
+І ось ми отримали не лише кількасот метрів в парку біля Гринвічу,
+а й кількасот кілометрів пішохідних шляхів у східній Англії.
+Це загальна проблема зв'язків.
+Як один зі способів її розв'язання можна використовувати обмежувальний прямокутник для обмеження виводу ([див. докладніше](../full_data/bbox.md#crop)).
 
-Finally, there is the output format _tags_.
-This is based on _ids_ and shows in addition all the tags of an object but no geometries or structures.
-First and foremost, it is useful if one [does not need](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB) the coordinates in the result:
+І на останок, існує формат _tags_.
+Він базується на _ids_ та показує додатково всі теґи об'єктів, але не їх геометрію чи складові.
+Перш за все, це корисно, якщо вам результаті [не потрібні координати](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB):
 
     ( way(51.477,-0.001,51.478,0.001)[name="Blackheath Avenue"];
       node(w);
       relation(51.477,-0.001,51.478,0.001); );
     out tags;
 
-It can also be [combined](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB) with the two geometry flags _center_ and _bb_:
+Його також можна [поєднати](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB) з двома параметрами, що повертають координати: _center_ та _bb_:
 
     ( way(51.477,-0.001,51.478,0.001)[name="Blackheath Avenue"];
       node(w);
@@ -143,22 +143,22 @@ It can also be [combined](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16
     out tags center;
 
 <a name="json"/>
-## JSON and GeoJSON
+## JSON та GeoJSON
 
-Now we turn to data formats:
-While the degree of detail can be selected per output command,
-the output format can be declared only globally per request.
-In addition, the choice of the output format only changes the form but not the content.
+Тепер перейдемо до форматів даних:
+Хоча ступінь деталізації можна вибрати для кожної команди виведення,
+вихідний формат може бути оголошений лише глобально на початку запита.
+Крім того, вибір формату виведення змінює лише форму, але не зміст.
 
-In JSON we arrive that way in the middle of a conflict.
-On the one hand, there is a quite popular format for geodata in JSON, called GeoJSON.
-On the other hand, the OpenStreetMap shall keep their structure,
-and this structure does not fit into the data model of GeoJSON.
+З форматом JOSN  ми опиняємось посередині конфлікту.
+З одного боку, це існує досить популярний формат JSON для геоданих - GeoJSON.
+З іншого боку, OpenStreetMap повинен зберігати свою структуру,
+і ця структура не вписується в модель даних GeoJSON.
 
-As a solution, there is a possibility to create GeoJSON conforming objects from OpenStreetMap objects.
-However, the original OpenStreetMap objects are faithfully represented in JSON and are not GeoJSON.
+Як рішення, є можливість створити об'єкти GeoJSON з об'єктів OpenStreetMap.
+Хоча, оригінальні об'єкти OpenStreetMap правдиво представляються в JSON, а не в GeoJSON.
 
-OpenStreetMap objects [in JSON](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB):
+Об'єкти OpenStreetMap [в JSON](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB):
 
     [out:json];
     ( way(51.477,-0.001,51.478,0.001)[name="Blackheath Avenue"];
@@ -166,7 +166,7 @@ OpenStreetMap objects [in JSON](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&z
       relation(51.477,-0.001,51.478,0.001); );
     out geom;
 
-Derived objects [in GeoJSON](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB):
+Похідні об'єкти [в GeoJSON](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB):
 
     [out:json];
     ( way(51.477,-0.001,51.478,0.001)[name="Blackheath Avenue"];
@@ -175,27 +175,25 @@ Derived objects [in GeoJSON](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom
     convert item ::=::,::geom=geom(),_osm_type=type();
     out geom;
 
-The creation of derived objects is a big subject with its [own chapter](../counting/index.md).
+Про створення похідних об'єктів докладніше йдеться у відповідному [розділі](../counting/index.md).
 
 <a name="csv"/>
 ## CSV
 
-Being capable to organize data in a table is often useful.
-For OpenStreetMap this means columns selected by the user and one line per found object.
+Можливість організовувати дані у вигляді таблиці часто буває корисним.
+В контексті OpenStreetMap це означає, що в стовпцях будуть теґи обрані користувачем, а кожний рядок буде представляти знайдений об'єкт.
 
-The choice of the columns properly restricts for most of the objects the information
-that is available about the object.
-E.g. tags not requested as a column get lost in the output.
-Geometries that are more complex than a single coordinate also cannot be printed in this format.
-This is a difference to the potentially faithful formats XML and JSON.
+Вибір стовпців належним чином обмежує доступну інформацію про об’єкт для більшості випадків.
+Так, теґи що не були зазначені як стовпці відкидаються при виводі.
+Геометрії, складніші за одну координату, також не можна виводити у цьому форматі.
+Це відмінність від форматів XML та JSON.
 
-The standard case of a column is to be the key of a tag.
-It is then printed for each object the value of the tag with this key on the object.
-If the object does not have that key,
-then an empty value is printed.
-For the further properties of an object there are special column header declarations;
-these start with `::`:
-[example](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
+В стандартному випадку назва стовпця це ключ теґу.
+В значеннях стовпців виводяться значення теґу для зазначених ключів об'єкта.
+Якщо в об'єкта немає такого ключа - виводиться пусте значення.
+Для стандартних властивостей об'єкта використовуються стовпці зі спеціальними назвами,
+які починаються з `::`:
+[приклад](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
 
     [out:csv(::type,::id,name)];
     ( way(51.477,-0.001,51.478,0.001)[name="Blackheath Avenue"];
@@ -203,11 +201,11 @@ these start with `::`:
       relation(51.477,-0.001,51.478,0.001); );
     out center;
 
-The abbreviation CSV used to mean _comma separated value_.
-But the various applications using this format have developed differing expectations
-what constitutes a delimiter.
-Thus, it is possible to configure the delimiter as well as
-it is possible [to turn the headline on or off](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB):
+Абревіатура CSV походить від _comma separated value_.
+Але різні програми, що послуговуються цим форматом, мають різні очікування,
+щодо символу що використовується як роздільник.
+Тож, є можливість вказати який символ використовувати як роздільник та
+[чи показувати заголовний рядок, чи ні](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB):
 
     [out:csv(::type,::id,name;false;"|")];
     ( way(51.477,-0.001,51.478,0.001)[name="Blackheath Avenue"];
@@ -215,4 +213,4 @@ it is possible [to turn the headline on or off](https://overpass-turbo.eu/?lat=5
       relation(51.477,-0.001,51.478,0.001); );
     out center;
 
-At [each application](index.md) it is indicated which variant fits.
+Для [кожного застосунку](index.md) він показує слушний варіант.
