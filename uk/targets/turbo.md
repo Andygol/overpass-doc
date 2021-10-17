@@ -1,167 +1,161 @@
 Overpass Turbo
 ==============
 
-The standard tool to develop requests.
+Стандартний інструмент для створення запитів.
 
 <a name="overview"/>
-## Overview
+## Огляд
 
-Overpass Turbo is a website
-to execute requests towards Overpass API
-and to watch the result on a map.
+Overpass Turbo – вебсайт для надсилання запитів до Overpass API та візуалізації результатів на мапі.
 
-Many examples in this manual link to Overpass Turbo with a predefined request text.
+Багато прикладів у цьому посібнику посилаються на Overpass Turbo із заздалегідь визначеним запитами.
 
-A public instance is available at [https://overpass-turbo.eu](https://overpass-turbo.eu).
-It is, like Overpass API, open source,
-and the source code is available from [Github](https://github.com/tyrasd/overpass-turbo).
-Martin Raifer has developed Overpass Turbo,
-and I'm grateful to him both for the idea and the software.
+Загально доступний сайт знаходиться за посиланням [https://overpass-turbo.eu](https://overpass-turbo.eu).
+Він, так само як і Overpass API, має відкриті сирці,
+які можна відшукати на [Github](https://github.com/tyrasd/overpass-turbo).
+Мартін Райфер (Martin Raifer) розробив Overpass Turbo,
+за що йому велика шана як за ідею, так і за її втілення.
 
-Almost all output formats
-that the Overpass API can emit
-can be understood by Overpass Turbo.
-Very large result sets cause difficulties;
-the JavaScript engines even of contemporary browsers then get strained in their memory management.
-For this reason, Overpass Turbo will ask you
-if it has received a large set of results
-if you accept the risk to freeze your browser by the amount of data.
+Майже всі вихідні формати, які видає Overpass API, сприймаються Overpass Turbo.
+Досить великі за обсягом результати можуть викликати певні труднощі;
+рушії JavaScript навіть в сучасних вебоглядачах не завжди добре пораються з розподілом пам'яті.
+З цих причин Overpass Turbo запитає у вас, чи потрібно отримувати результати, 
+щоб не підвісити ваш оглядач, якщо їх обсяг завеликий.
 
-There are many popular and helpful features in Overpass Turbo,
-but they exceed the mission of this manual.
-Instead, the proper [documentation of Overpass Turbo](https://wiki.openstreetmap.org/wiki/Overpass_turbo) introduces them.
-Features not introduced here include e.g. _styles_ and the request generator _wizard_.
-This manual concentrates on the immediate interaction between Overpass Turbo and the Overpass query language.
+У Overpass Turbo є багато популярних та корисних функцій,
+але їх опис виходить за межі цього посібника.
+Натомість ви можете ознайомитись з [документацією по Overpass Turbo](https://wiki.openstreetmap.org/wiki/Overpass_turbo) у ВікіОСМ.
+Там ви можете дізнатись про такі можливості, як застосування _стилів_ та використання _помічника_ для створення запитів.
+Цей посібник зосереджений на безпосередній взаємодії між Overpass Turbo та мовою запитів Overpass.
 
 <a name="basics"/>
-## Basics
+## Основи
 
-The interface of the website consists of multiple parts;
-these parts are differently arranged between desktop and mobile site version.
-Please open [the site](https://overpass-turbo.eu) now in a separated browser tab.
+Інтерфейс вебсайту складається з кількох частин;
+вони мають різне розташування для настільної та мобільної версії сайту.
+Відкрийте [сайт](https://overpass-turbo.eu) в окремій вкладці вашого оглядача.
 
-In the desktop version there is on the left a large text field;
-please type or paste your request here.
-The right part is a slippy map.
-By the two tabs in the upper right corner
-this part can be switched between the map view and a text field showing the received raw data.
+В настільній версії ліворуч знаходиться велике поле для вводу тексту;
+введіть або вставте ваш запит тут.
+Праворуч знаходиться рухома мапа.
+Праворуч вгорі над нею дві вкладки, за допомогою яких можна перемикатись між мапою та безпосереднім 
+переглядом даних, отриманих в результаті виконання запитів.
 
-In the mobile version the text field sits above the slippy map.
-The second text field for the received raw data is below the slippy map.
-Instead of the tabs you switch between the two parts by intense scrolling.
+В мобільній версії текстове поле знаходиться вгорі над мапою.
+Друге текстове поле, нижче мапи, містить дані отримані в результаті виконання запиту.
+Замість вкладок ви перемикаєтесь між двома частинами шляхом інтенсивної прокрутки.
 
-We exercise the standard use case:
-Please enter into the text field ...
+Спробуйте стандартний спосіб:
+введіть цей текст у поле для запитів…
 
     nwr[name="Canary Wharf"];
     out geom;
 
-... or use [this link](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=18&Q=CGI_STUB)!
+… або скористайтесь цим [посиланням](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=18&Q=CGI_STUB)!
 
-Please click now on _Execute_.
-For a short moment a progress meter asks you to be patient.
-Then you see almost exactly the same as before.
+Тепер натисніть на кнопку _Execute_.
+Через секунду індикатор прогресу попросить вас набратися терпіння.
+Потім ви побачите майже те саме, що і раніше.
 
-Please click now on the magnifier.
-This is on the left brim of the slippy map the third symbol counted from the top,
-below the plus and minus buttons.
-The slippy map moves to the center of the results and the finest possible resolution
-such that still all results fit into the viewport.
+Натисніть на кнопку з лупою.
+Дивіться на лівому краю мапи, третя кнопка зверху,
+під кнопками плюс і мінус.
+Рухома мапа переміститься до центру території з вашими результатами та змінить масштаб мапи,
+так щоб показати їх всі у вашому оглядачі.
 
-The objects marked in the map view are now exactly the objects that the request has found.
+Об’єкти, показані поверх мапи, це саме ті об’єкти, які знайшов запит.
 
-It is often useful to view the raw returned data.
-It gets shown when you click on the tab _Data_ above the upper right corner of the map view
-respectively with scrolling in the mobile version.
+Часто корисно переглядати отримані дані так як вони були отримані в необробленому вигляді.
+Це можна зробити натиснувши на вкладку _Data_ у верхньому куті праворуч, або спустившись нижче
+в мобільній версії.
 
-Meanwhile, all on the map highlighted objects are clickable
-and show on click, depending on the degree of detail of the request,
-their id, their tags, and their metadata.
+Тим часом усі показані на мапі об'єкти можна натискати 
+та переглядати, залежно від ступеня деталізації запиту, 
+їх ідентифікатор, теґи та метадані.
 
-Eventually you will get the warning
-that not for all objects the geometry has been delivered.
-Then you can try out the automatic completion of the request.
-Or you replace all `out` in the request by their counterparts with geometry `out geom`.
+За певних обставин ви отримаєте попередження, що геометрія отримана не для всіх об'єктів.
+Після чого ви можете скористатись автодоповненням запиту.
+Або замініть всі `out` в запиті на `out geom`.
 
-If you anticipate a large result
-or if you want to process the result anyway with a different tool than Overpass Turbo
-then you can directly export the data without an attempt to display them:
-Please go to _Export_, keep in the tab _Data_,
-and select `raw data directly from Overpass API`.
-For long running requests it is normal
-that apparently nothing happens after the click to trigger the request.
+Якщо ви очікуєте великого результату
+або якщо ви все одно хочете обробити результат іншим інструментом, ніж Overpass Turbo
+тоді ви можете безпосередньо експортувати дані без спроби їх показу на мапі:
+Натисніть кнопку _Export_ та в розділі _Data_
+оберіть `raw data directly from Overpass API`.
+Для тривалих запитів це нормально
+що, майже нічого не відбувається після запуску виконання запиту.
 
-I suggest you to put attention to two useful features:
+Пропонуємо вам звернути увагу на дві корисні функції:
 
-* In the lower right corner of the map view
-  a counter shows how many objects of each type have been returned in the last request.
-* In the upper left corner there is a search input field.
-  Although it is less powerful than [Nominatim on openstreetmap.org](../criteria/nominatim.md),
-  it is usually good enough for the names of towns to place the slippy map at the right location.
+* У нижньому правому куті перегляду карти
+  лічильник показує, скільки об’єктів кожного типу було повернуто в останньому запиті.
+* У верхньому лівому куті є поле для пошуку місця.
+  Попри те, що він менш потужний, ніж [Nominatim на openstreetmap.org](../criteria/nominatim.md),
+  зазвичай цього досить щоб знайти назву міста, щоб перемістити положення мапи до нього.
 
 <a name="symbols"/>
-## Symbols
+## Позначки
 
-The [documentation of Overpass Turbo](https://wiki.openstreetmap.org/wiki/Overpass_turbo) already explains the colours.
-We put our attention rather to the interaction here:
-For a given object or type of object you have an idea
-whether it is a point, a line, a composition of both, something abstract or something with a fuzzy boundary.
-In the OpenStreetMap data structures it is modeled in some way;
-this can meet or differ from your expectation.
+В [документації до Overpass Turbo](https://wiki.openstreetmap.org/wiki/Overpass_turbo) є опис того, що означає той чи інший кольори.
+Розглянемо натомість тут взаємодію:
+Для певного об'єкта чи типу об'єкта ви матимете уяву
+чи то точка, лінія, або поєднання їх обох, щось абстрактне чи щось з нечіткою межею.
+В структурі даних OpenStreetMap це відбувається певним чином,
+що може збігатись чи ні з вашими очікуваннями.
 
-The Overpass API offers [tools](formats.md#extras)
-to change from the OpenStreetMap representation to a representation
-that better fits the presentation.
-This can happen by amending the coordinates, geometric simplification, or [by cropping](../full_data/bbox.md#crop).
-Overpass Turbo strives to always present in the best possible way,
-no matter whether the representation in OpenStreetMap makes sense,
-and also no matter whether the output format chosen in the request fits to the data or not.
+Overpass API пропонує [інструменти](formats.md#extras)
+для зміни подання даних OpenStreetMap у вигляді що краще пасує поточним потребам.
+Ці зміни можуть відбуватись шляхом змін координат, спрощення геометрії або [відкидання](../full_data/bbox.md#crop) надлишку.
+Overpass Turbo намагається показувати дані в найкращий спосіб,
+незалежно від того, чи має сенс представлення відповідно до моделі даних OpenStreetMap,
+чи вихідний формат, обраний у запиті, відповідає даним чи ні.
 
-This section shall explain
-what presentation finally the given situation results in
-and how this is influenced by the request and the data.
+Цей розділ містить пояснення
+до якого вигляду врешті-решт призводить такий стан речей
+та як на це впливає запит та дані.
 
-Objects appearing as points can have a yellow or a red interior.
-Those with yellow interior are _nodes_
-while those with red interior are _ways_.
+Об'єкти, що показуються точками, можуть мати жовте або червоне забарвлення.
+Об'єкти з жовтим забарвленням є _точками_,
+в той час як об'єкти з червоним забарвленням – це _лінії_.
 
-Ways can be morphed to points due to their small extent
-because otherwise they may become too unremarkable:
-Please zoom out in [this example](https://overpass-turbo.eu/?lat=51.477&lon=0.0&zoom=19&Q=CGI_STUB)
-and observe how buildings and streets morph into points!
+Лінії можуть стискатись до точок через їх невелику довжину
+бо в іншому разі вони стають непомітними на мапі.
+Будь ласка, віддалиться у [цьому прикладі](https://overpass-turbo.eu/?lat=51.477&lon=0.0&zoom=19&Q=CGI_STUB)
+щоб побачити як будинки та дороги перетворюються у точки!
 
     ( way({{bbox}})[building];
       way({{bbox}})[highway=steps]; );
     out geom;
 
-If this hampers the presentation of a specific result,
-then you can turn that off at _Settings_, _Map_, _Don't display small features as POIs_.
-The setting comes into effect with the execution of the next request (or the same request again).
+Якщо це ускладнює подання конкретного результату,
+ви можете відключити це в налаштуваннях: _Settings_, _Map_, _Don't display small features as POIs_.
+Налаштування набувають чинності після виконання наступного запиту (або того ж самого запиту знову).
 
-Or the objects have been collapsed because [the request](https://overpass-turbo.eu/?lat=51.477&lon=0.0&zoom=19&Q=CGI_STUB) has asked only for points by `out center`:
+Або об'єкти стискаються тому що в цьому [запиті](https://overpass-turbo.eu/?lat=51.477&lon=0.0&zoom=19&Q=CGI_STUB) є інструкція показувати тільки точки центру об'єктів - `out center`:
 
     way({{bbox}})[building];
     out center;
 
-Point objects can have a blue or a purple border;
-and this applies also to line segments or areas.
-In all these cases, _relations_ are [involved](https://overpass-turbo.eu/?lat=51.5045&lon=-0.0195&zoom=16&Q=CGI_STUB):
+Точкові об'єкти можуть мати блакитний чи пурпуровий контур;
+це також стосується відрізків та полігонів.
+У всіх цих випадках ми [маємо справу](https://overpass-turbo.eu/?lat=51.5045&lon=-0.0195&zoom=16&Q=CGI_STUB) зі _зв'язками_:
 
     rel[name="Canary Wharf"];
     out geom;
 
-Opposed to _nodes_ or _ways_, the details of the _relation_ then are not shown by a click on the object,
-but in the object's bubble there is just a link to the relation's presentation on the main server.
-Under normal circumstances, this is no problem.
+На відміну від _точок_ та _ліній_, інформація про _зв'язок_ не показується при натисканні на об'єкт,
+натомість у вікні з інформацією об'єкта є посилання на сторінку зв'язка на сайті osm.org.
+За звичайних обставин це не проблема.
 
-But if you have asked for a museum version different from the current version,
-then the data from the main page is still the current version
-and thus differs from the data returned from your request.
-Rather, you need to look into the raw data shown in the tab _Data_.
+Але, якщо ви запросили відмінності між поточною та колишньою версією об'єкта,
+дані на головній сторінки будуть містити поточну версію, що 
+відрізняються від даних які було повернуто на ваш запит.
+Тож, вам треба дивитись на необроблені дані на вкладці _Data_.
 
-If the line or boundary of the area is dashed,
-then the geometry of the object is incomplete.
-This is almost always an intended effect of the [output clipping](../full_data/bbox.md#crop) ([example](https://overpass-turbo.eu/?lat=51.4765&lon=0.0&zoom=16&Q=CGI_STUB)):
+Якщо лінія чи межі показані пунктиром,
+це означає що отримана геометрія об'єкта не є повною.
+
+Майже завжди це передбачуваний ефект від [обрізки виводу](../full_data/bbox.md#crop) ([приклад](https://overpass-turbo.eu/?lat=51.4765&lon=0.0&zoom=16&Q=CGI_STUB)):
 
     (
       way(51.475,-0.002,51.478,0.003)[highway=unclassified];
@@ -169,11 +163,11 @@ This is almost always an intended effect of the [output clipping](../full_data/b
     );
     out geom(51.475,-0.002,51.478,0.003);
 
-But it can also be the effect of a request
-that has added for a _way_ some but not all _nodes_.
-Here we have loaded _ways_ based on _nodes_,
-but we have [forgotten](https://overpass-turbo.eu/?lat=51.4765&lon=0.0&zoom=17&Q=CGI_STUB)
-to ask for the nodes referred by the ways but outside the bounding box:
+Але це також може бути наслідком запиту
+що додав до _лінії_ деякі, але не всі _точки_.
+Тут ми завантажуємо _лінії_ що створюються з _точок_,
+але ми [забули](https://overpass-turbo.eu/?lat=51.4765&lon=0.0&zoom=17&Q=CGI_STUB)
+запитати точки, що знаходяться за межами обмежувального прямокутника:
 
     (
       node(51.475,-0.003,51.478,0.003);
@@ -181,8 +175,8 @@ to ask for the nodes referred by the ways but outside the bounding box:
     );
     out;
 
-The request [can be fixed](https://overpass-turbo.eu/?lat=51.4765&lon=0.0&zoom=17&Q=CGI_STUB) by `out geom`;
-more possibilities are listed in the section about [geometry](../full_data/osm_types.md#nodes_ways):
+Цей запит [можна виправити](https://overpass-turbo.eu/?lat=51.4765&lon=0.0&zoom=17&Q=CGI_STUB) додавши `out geom`;
+більше варіантів ви можете знайти в розділі - [геометрія](../full_data/osm_types.md#nodes_ways):
 
     (
       node(51.475,-0.003,51.478,0.003);
@@ -191,42 +185,42 @@ more possibilities are listed in the section about [geometry](../full_data/osm_t
     out geom;
 
 <a name="convenience"/>
-## Convenience
+## Зручності
 
-Overpass Turbo offers some convenience features.
+Overpass Turbo пропонує деякі зручності.
 
-It can inject the bounding box of the current viewport into a request.
-In particular, it replaces every occurrence of the substring `{{bbox}}` by the coordinates of the four edges
-such that the server sees a valid bounding box.
+Він може використовувати поточний вид мап для обмеження території запиту.
+Він замінює в кожному рядку текст `{{bbox}}` на координати кутів мапи,
+що використовуються як координати обмежувального прямокутника.
 
-You can make the sent bounding box visible
-if you [set this substring](https://overpass-turbo.eu/?lat=51.4765&lon=0.0&zoom=17&Q=CGI_STUB) in a different location than usual
-(and then press execute):
+Ви можете дізнатись координати обмежувального прямокутника
+додавши  [цей рядок](https://overpass-turbo.eu/?lat=51.4765&lon=0.0&zoom=17&Q=CGI_STUB) у будь-яку
+частину вашого запиту (та запустивши його на виконання):
 
     make example info_text="The current bounding box is {{bbox}}";
     out;
 
-A second handy feature is controlled by the button _Share_ in the upper left corner.
-This creates a permanent link
-where you can get back the request written at the moment when the link has been created.
-Even if somebody else opens the link and edits the request,
-then the link still points to the originally stored request.
+Другою зручною функцією керує кнопка _Share_ у верхньому лівому куті.
+Вона дозволяє отримати постійне посилання на запит,
+який знаходився в полі вводу в момент її натискання.
+Навіть якщо хтось інший скориставшись цим посиланням змінить запит,
+посилання буде вказувати на оригінальний запит.
 
-It is also possible, per checkbox, to convey the current map viewport.
-This manifests as center coordinate and zoom level,
-in particular the visible map differs between screens of different sizes.
+Також можливо, за допомогою прапорця, передати координати поточного вигляду мапи.
+Це виглядає як координати центру мапи та рівень масштабування,
+звісно розмір видимої мапи буде відрізнятися, в залежності від розміру екрану користувача.
 
 <a name="limitations"/>
-## Limitations
+## Обмеження
 
-Overpass Turbo can make sense of almost all output options of Overpass API.
-Nonetheless there are some limitations:
+Overpass Turbo може зрозуміти практично всі варіанти виводу Overpass API.
+Одна все одно є певні обмеження.
 
-Per object id and type Overpass Turbo shows only one object.
-Thus, [diffs](index.md) cannot be visualized by Overpass Turbo in a meaningful way.
+Для кожного ідентифікатора об'єкта та типу Overpass Turbo показує лише один об'єкт.
+Тож, [відмінності](index.md) не можуть бути візуалізовані в Overpass Turbo.
 
-Overpass Turbo does not show [GeoJSON](../targets/formats.md#json) directly from the Overpass API.
-Overpass Turbo has its own conversion module for GeoJSON,
-and Martin is wary of the user confusion
-if both mechanisms are active in parallel.
-For the moment being, to show GeoJSON you need to use the experimental instance [https://olbricht.nrw/ovt/](https://olbricht.nrw/ovt/).
+Overpass Turbo не показує [GeoJSON](../targets/formats.md#json) безпосередньо з Overpass API.
+Overpass Turbo має власний модуль для перетворення в GeoJSON,
+і Мартин з насторогою ставиться до того, що користувачі плутаються,
+коли обидва механізми працюють паралельно.
+Зараз для показу GeoJSON вам краще скористатись експериментальним сервером - [https://olbricht.nrw/ovt/](https://olbricht.nrw/ovt/).
