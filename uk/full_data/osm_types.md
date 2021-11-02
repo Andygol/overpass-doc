@@ -1,204 +1,202 @@
-Geometries
-==========
+Геометрія
+=========
 
-To explain the different variants of getting full OpenStreetMap data within a region
-the fine print of the OpenStreetMap data model is explained here.
+Щоб пояснити різні варіанти отримання повних даних OpenStreetMap в межах регіону
+тут треба пояснити тонкощі моделі даних OpenStreetMap.
 
 <a name="scope"/>
-## Scope of this Section
+## Область застосування
 
-The OpenStreetMap data types already have been introduced in [a subsection](../preface/osm_data_model.md) of the preface.
-Thus, you already are familiar with nodes, ways, and relations.
+Типи даних OpenStreetMap вже були представлені у [підрозділі](../preface/osm_data_model.md) вступу.
+Тож ви вже знаєте про точки, лінії та зв'язки.
 
-OpenStreetMap data can be represented in different ways.
-Output formats like JSON or XML are explained in the subsection [Data Formats](../targets/formats.md).
-The range of possible levels of detail with regard to structure, geometry, tags, version information and attribution also are introduced there.
+Дані OpenStreetMap можна представити різними способами.
+Про вихідні формати, такі як JSON чи XML, йдеться у відповідному підрозділі розділу [Формати даних](../targets/formats.md).
+Про перелік можливих рівнів деталізації, що стосуються структури, геометрії, теґів, версій та атрибутів ви можете дізнатись тут.
 
-The issue at stake here is
-how completing ways and relations equips them with a useful geometry
-while keeping the total size manageable.
+Тут йдеться про те, як доповнити лінії та зв'язки інформацією про їх геометрію,
+так, щоб обсяг отриманих даних залишався прийнятним.
 
 <a name="nodes_ways"/>
-## Ways and Nodes
+## Лінії та точки
 
-A usable geometry for nodes is easy to obtain:
-All output modes except `out ids` and `out tags` include the coordinates of the nodes,
-because they are anyway part of the nodes by the definition in the OpenStreetMap data model.
+Придатну для використання геометрію для точок отримати легко:
+Всі види виводу, крім `out ids` та `out tags`, включають інформацію про координати точок,
+через те що координати і так є частиною даних точок, відповідно до моделі даних OpenStreetMap.
 
-By contrast, ways already can be equipped with geometry in multiple ways:
-In the best of all cases, your program can process coordinates on ways.
-You can observe the difference e.g. in Overpass Turbo,
-by comparing the results of the two following requests in the tab _Data_ (upper right corner):
-[without coordinates](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
+На відміну від точок, лінії отримують інформацію про власну геометрію у різний спосіб:
+У кращому випадку ваша програма може працювати з координатами ліній.
+
+Ви можете помітити різницю, напр. в Overpass Turbo,
+порівнявши результати двох наступних запитів на вкладці _Data_ (верхній правий кут):
+[без координат](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
 
     way(51.477,-0.001,51.478,0.001);
     out;
 
 
-and [with coordinates](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
+та [з координатами](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
 
     way(51.477,-0.001,51.478,0.001);
     out geom;
 
-The original data model of OpenStreetMap does not admit coordinates on ways,
-because the ways already have references to nodes.
-Therefore, there still exist programs that cannot process coordinates on ways.
-For those there exist two levels of faithfulness to deliver the geometry in the traditional way.
+Оригінальна модель даних OpenStreetMap не передбачає наявність координат для ліній,
+через те що вони вже є у точок з яких складається лінія.
+Тому все ще існують програми, які не можуть обробляти координати ліній.
+Для них існує два варіанти, щоб передати геометрію традиційним способом.
 
-The least extra effort is due if one requests only coordinates of the nodes.
-After the output statement of the ways, a statement `node(w)` selects the in the ways referred nodes;
-the mode `out skel` reduces the amount of data to pure coordinates,
-and the supplement `qt` eliminates the effort to sort the output:
-[(link)](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
+З найменшими зусиллями, якщо запитуються координати тільки для точок.
+Або після виводу ліній, за допомогою оператора `node(w)` отримати всі точки, на які посилаються лінії;
+режим `out skel` зменшує обсяг даних до чистих координат, та 
+застосування `qt` зменшує потребу в сортуванні отриманих даних:
+[(запит)](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
 
     way(51.477,-0.001,51.478,0.001);
     out qt;
     node(w);
     out skel qt;
 
-I suggest to inspect the output in the tab _Data_ (upper right corner).
-The nodes appear after scrolling sufficiently far down.
+Подивіться на отримані дані на вкладці _Data_ (верхній кут праворуч).
+Точки будуть йти відразу після ліній.
 
-This is already closer to the original data model,
-but there are programs that still do not work with this form of data.
-There is a practice to place all nodes before any ways and to sort the elements of the same type by their ids.
-To achieve this we must load the nodes in parallel to the ways before we can output anything.
-The idiom `(._; node(w););` accomplishes this by its three statements `._`, `node(w)`, and `(...)`:
-[(link)](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
+Це вже ближче до вихідної моделі даних,
+але є програми, які досі не працюють з цією формою даних.
+Взагалі то, заведено розміщувати всі точки перед лініями і сортувати елементи одного типу за їх ідентифікаторами.
+Для цього нам потрібно завантажувати точки і лінії паралельно перед тим як вивести будь-що.
+Вираз `(._; node(w););` досягає цього за допомоги трьох виразів `._`, `node(w)` та `(…)`:
+[(запит)](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
 
     way(51.477,-0.001,51.478,0.001);
     (._; node(w););
     out;
 
-Nodes and ways each with all their details together are explained [in the final section](#full).
+Точки та лінії, кожна із всіма їх власними деталями, пояснюються [в останньому розділі](#full).
 
 <a name="rels"/>
-## Relations
+## Зв'язки
 
-As with ways, the simpler case is
-that the downstream tool can handle integrated geometry directly.
-For this purpose the direct comparison:
-[without coordinates](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
+Так само як і у випадку з лініями, найпростішим буде отримання геометрії за допомогою вбудованих можливостей Overpass API.
+Порівняйте два запити:
+[без координат ](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
 
     relation(51.477,-0.001,51.478,0.001);
     out;
 
-and [with coordinates](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
+та [з координатами](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
 
     relation(51.477,-0.001,51.478,0.001);
     out geom;
 
-In contrast to the ways the data grows by an order of magnitude:
-This is because in the variant without coordinates, we see the ids of the member ways only,
-but in fact each way consists of multiple nodes and accordingly has multiple coordinates.
+На відміну від ліній дані завантажуються в порядку їх важливості:
+У запиті без координат ми бачимо лише ідентифікатори ліній, 
+але ж фактично, кожна лінія складається з багатьох точок, які, відповідно, мають координати.
 
-Relations with most of the members being of type way are much more frequent than anything else.
-For this reason there is the mechanism to restrict the output geometry to a bounding box,
-which is described in the subsection [Crop the Bounding Box](bbox.md#crop):
-an [example](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
+Зв'язки, членами яких є лінії, є найпоширенішими.
+Тому був розроблений механізм, який дозволяє обмежити вивід геометрії межами обмежувального прямокутника,
+про це можна дізнатись з розділу [Обрізання виводу](bbox.md#crop):
+[приклад](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
 
     relation(51.477,-0.001,51.478,0.001);
     out geom({{bbox}});
 
-The original data model of OpenStreetMap does not admit coordinates for relations, too.
-For software that needs the strictly original data model, there again are two levels of faithfulness.
-One gets a result the most possible way reduced to only the extra coordinates
-by outputting the relations first and then resolving their dependencies.
-This needs two pathes of data flow,
-because relations can have nodes directly as members,
-but also indirectly as the members of the ways that are members of the relation.
-We would have to use four statements.
-Because this is such a frequent case there is an extra short shortcut statement `>`:
-[(link)](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
+Оригінальна модель даних OpenStreetMap не передбачає наявність координат для зв'язків, також.
+Для програмного забезпечення, яке строго слідує оригінальній моделі даних, знов таки ж,
+є два варіанти отримання даних.
+Отримуються результати максимально скорочені до координат для зв'язків,
+отримавши самі зв'язки з подальшим розв'язанням їх залежностей.
+Це потребує двох потоків обробки даних,
+тому що зв'язки можуть безпосередньо отримати координати для точок, які самі є членами зв'язків,
+а також їм потрібні координати точок для членів-ліній.
+Для цього ми використаємо чотири вирази.
+Через те, що це досить частий випадок, тут використовується досить коротке скорочення `>`:
+[(приклад)](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
 
     relation(51.477,-0.001,51.478,0.001);
     out qt;
     >;
     out skel qt;
 
-In comparison to the preceding output the volume of data has already doubled,
-because we always need to include both the reference target and the reference itself.
+У порівнянні з попереднім виводом обсяг даних уже подвоївся,
+тому що ми завжди повинні включати як референсні дані, так і залежності для них.
 
-The completely compatible variant claims even more data volume.
-It employs the idiom `(._; >;);` built from the statements `._`, `>`, and `(...)`:
-[(link)](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
+Повністю сумісний варіант вимагає ще більшого обсягу даних.
+Тут використовується вираз `(._; >;);` зібраний з виразів `._`, `>` та `(…)`:
+[(приклад)](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
 
     relation(51.477,-0.001,51.478,0.001);
     (._; >;);
     out;
 
-Is there a solution possible also here to restrict the set of retrieved coordinates to the bounding box?
-Because a relation is contained in a bounding box
-if and only if at least one of its members is contained in the bounding box,
-we can achieve this by asking for the referred objects first and then resolve backwards.
-The statement `<` facilitates this:
-It is a shortcut to find all ways and relations
-that refer to the given nodes or ways as members.
-Thus we search for all nodes and ways in the bounding box.
-Then we keep them with the statement `._` and search all relations
-that refer to these as members: [(link)](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
+Чи існує рішення щодо обмеження виводу обмежувальним прямокутником?
+Оскільки зв'язок може знаходитись в обмежувальному прямокутнику, якщо
+хоча б один з його членів знаходиться в прямокутнику,
+ми можемо досягти цього спочатку отримуючи об'єкти з обмежувального прямокутника,
+з подальшим розв'язанням зворотніх залежностей.
+Вираз `<` як раз допомагає в цьому.
+Це скорочення, яке використовується для пошуку всіх ліній та зв'язків
+які складаються з отриманих точок та ліній, відповідно.
+Тож ми шукаємо всі точки та лінії в обмежувальному прямокутнику.
+Ми зберігаємо їх у виразі `._` і шукаємо всі зв'язки, що посилаються на них
+як на своїх членів: [(приклад)](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
 
     ( node(51.477,-0.001,51.478,0.001);
       way(51.477,-0.001,51.478,0.001); );
     (._; <;);
     out;
 
-The relations can be spotted by the traces they leave on their members:
-These have a different colour than ordinary search results in Overpass Turbo.
-The relations are even easier to find in the tab _Data_;
-just scroll down to the end.
+Зв'язки можна помітити по слідах, які вони залишають на своїх членах.
+Вони мають інший колір на відміну від звичайних результатів в Overpass Turbo.
+Зв'язки досить просто знайти на вкладці _Data_;
+прокрутіть в кінець.
 
-Hence, most members of the relations are not loaded at all;
-only the members within the bounding box are loaded.
-This request is not ready for production use because we do not load all used nodes for the ways.
-A completed request can be found below in the section [Grand Total](#full).
+Отже, більшість членів відносин взагалі не завантажені;
+завантажуються лише елементи в межах обмежувального прямокутника.
+Запит все ще не готовий для використання, оскільки ми не завантажили всі потрібні точки для ліній.
+Повний запит знаходиться наприкінці в розділі [Підсумки](#full).
 
 <a name="rels_on_rels"/>
-## Relations on Top of Relations
+## Зв'язки, що складаються зі зв'язків
 
-To demonstrate the problem with relations on relations,
-we hardly need to enlarge the bounding box.
-We start with the request from above without relations on relations:
-[(link)](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
+Для демонстрації проблеми отримання зв'язків, що складаються зі зв'язків
+нам доведеться збільшити розмір обмежувального прямокутника.
+Розпочнемо спочатку із запиту основного зв'язку:
+[(посилання)](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
 
     relation(51.47,-0.01,51.48,0.01);
     (._; >;);
     out;
 
-Now we replace the resolution from the relations downwards by
+Тепер замінимо підстановку членів зв'язка
 
-* a backwards resolution from relations on relations
-* the complete forward resolution of the found relations down to the coordinates
+* зворотню підстановку для членів-зв'язків
+* пряму підстановку для членів вкладених зв'язків, для отримання координат
 
-These are performed by the statements `rel(br)` and `>>`:
-[(link)](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
+Такі підстановки виконуються за допомогою виразів `rel(br)` та `>>`:
+[(посилання)](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
 
     relation(51.47,-0.01,51.48,0.01);
     ( rel(br); >>;);
     out;
 
-Depending on the system you send the request from
-this will paralyze your browser or trigger a warning message.
-We intended to get a corner of the suburb Greenwich,
-but actually we got data from almost all of London,
-because there is a collection of relations called _Quietways_.
-This has multiplied the anyway already huge amount of data.
+В залежності від системи звідки ви виконуєте такий запит,
+він може паралізувати роботу вашого оглядача або спровокувати появу попередження про це.
+Ми хочемо отримати куточок передмістя Гринвіча,
+а насправді отримуємо дані майже для всього Лондона,
+через наявність збірки зв'язків з назвою _Quietways_.
+Що призводить до багатократного збільшення і таке не малого обсягу уданих.
 
-Even if there will be no more collecting relations in the future
-like this is currently the case for our test region with about hundred meters edge length:
-Do you really want to make your application vulnerable to fail
-just because an inexperienced mapper in the region of interest creates one or more collecting relations?
+Навіть якщо ви не зустрінетесь зі зв'язками-колекціями в майбутньому, 
+як в нашому прикладі, чи справді ви бажаєте наражати ваш застосунок
+отриманням непередбачуваної кількості даних, тільки через те, що
+хтось з маперів створив зв'язок-колекцію, що містить кілька зв'язків?
 
-For this reason I strongly discourage you to work with relations on relations.
-This data structure creates the risk
-to inadvertently lump up huge amounts of data.
+Через це з боку розробників Overpas API є стійке заперечення таких зв'язків.
+На їх думку, такі структури в даних створюють ризик отримання непередбачуваної кількості даних.
 
-If you really want to work with relations on relations,
-then it is a much more feasible solution
-to only load those relations,
-but to refrain from the forward resolution.
-For this purpose, we amend our last request from the subsection _Relations_ with the backwards resolution `rel(br)`:
-[(link)](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
+Якщо у вас дійсно є потреба в обробці зв'язків, що складаються з інших 
+зв'язків, то для цього є дієве рішення - обмежитись лише такими зв'язками без спроби виконати пряму підстановку.
+Для цього змінимо останній запит з отримання _зв'язків_ на початку, до їх зворотньої реконструкції за отриманими перед цим об'єктами `rel(br)`:
+[(посилання)](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
 
     ( node(51.47,-0.01,51.48,0.01);
       way(51.47,-0.01,51.48,0.01); );
@@ -206,13 +204,13 @@ For this purpose, we amend our last request from the subsection _Relations_ with
     out;
 
 <a name="full"/>
-## Grand Total
+## Підсумки
 
-We line up here the most likely helpful variants.
+Ми розглянули тут найбільш вірогідні корисні варіанти.
 
-If your software of choice can handle coordinates on the object,
-then you can get all nodes, ways, and relations inside the bounding box complete as follows:
-[(link)](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
+Якщо обране вами програмне забезпечення може обробляти координати об’єкта,
+тоді ви можете отримати всі точки, лінії та зв'язки всередині обмежувального прямокутника:
+[(посилання)](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
 
     ( node(51.477,-0.001,51.478,0.001);
       way(51.477,-0.001,51.478,0.001); );
@@ -220,16 +218,16 @@ then you can get all nodes, ways, and relations inside the bounding box complete
     <;
     out qt;
 
-This collects
+Цей запит збирає
 
-* all nodes in the bounding box (selection in line 1, output in line 3)
-* all ways in the bounding box including those that only cross the bounding box without a node inside (selection in line 2, output in line 3)
-* all relations that have at least one node or way as a member that is inside the bounding box (selection line 4, output line 5); the relations get no geometry beside the geometry that its included members have anyway.
+* всі точки в середині прямокутника (запит - рядок 1, вивід - рядок 3)
+* всі лінії в середині прямокутника, включаючи ті, що перетинають прямокутник, але не мають власних точок в ньому (запит - рядок 2, вивід - рядок 3)
+* всі зв'язки, які мають принаймні одну точку чи лінію в середині прямокутника (запит - рядок 4, вивід - рядок 5); зв'язки не отримують іншої геометрії крім геометрії наявних членів.
 
-You get the same data just without relations if you use only the lines 1 to 3 as a request.
+Ви отримуєте ті самі дані без зв’язків, якщо використовуєте лише рядки з 1 по 3.
 
-You get relations on relations if you amend line 4 by the statements to collect relations and relations on relations:
-[(link)](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
+Ви отримаєте зв'язки, які складаються зі зв'язків, якщо зміните рядок 4:
+[(посилання)](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
 
     ( node(51.47,-0.01,51.48,0.01);
       way(51.47,-0.01,51.48,0.01); );
@@ -237,12 +235,12 @@ You get relations on relations if you amend line 4 by the statements to collect 
     ( <; rel(br); );
     out qt;
 
-You also can output the data in the strictly traditional format sorted by element type and only with indirect geometry.
-This requires in particular the forward resolution of the ways to get all nodes for the ways' geometries.
-For this purpose, we must replace the statement `<` by a more precise idiom,
-because otherwise the statement `<` picks up ways on the just added nodes.
-The first variant then becomes:
-[(link)](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
+Ви також можете виводити дані в традиційному форматі, відсортовані за типом елемента з неявним зазначенням отримання геометрії.
+Це вимагає, зокрема, прямого розв'язання геометрії ліній, через отримання координат їх точок.
+Для цих потреб потрібно замінити вираз `<` точнішою ідіомою,
+бо у зворотньому випадку вираз `<` підхватить лінії для тільки що доданих точок.
+Перший варіант виглядає наступним чином:
+[(посилання)](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
 
     ( node(51.47,-0.01,51.48,0.01);
       way(51.47,-0.01,51.48,0.01); );
@@ -255,13 +253,13 @@ The first variant then becomes:
       node(w); );
     out;
 
-Here, the lines 3 to 7 are responsible for the relations.
-Without the lines 4 to 8 but with the lines 9 to 11 for the completion of the ways and the output
-one only gets nodes and ways.
+Тут рядки з 3 по 7 відповідають за зв'язки.
+Без рядків з 4 по 8, але з рядками з 9 по 11, що використовуються для
+доповнення ліній на виході будуть лише точки та лінії.
 
-Conversely, relations on relations can be collected
-by adding an extra line 8 to the existing line 7:
-[(link)](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
+І навпаки, зв'язки що складаються зі зв'язків можна зібрати
+шляхом додавання додаткового рядка 8 до наявного рядка 7:
+[(посилання)](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=16&Q=CGI_STUB)
 
     ( node(51.47,-0.01,51.48,0.01);
       way(51.47,-0.01,51.48,0.01); );
@@ -275,6 +273,6 @@ by adding an extra line 8 to the existing line 7:
       node(w); );
     out;
 
-Further approaches exist,
-but have mainly importance for historical reasons.
-We present two of them in the [next subsection](map_apis.md).
+Існують інші підходи,
+але вони мають переважно історичне значення.
+Два з них буде розглянуто в [наступному підрозділі](map_apis.md).
