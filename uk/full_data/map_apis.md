@@ -1,28 +1,28 @@
-Further Map APIs
-================
+Про Map API
+===========
 
-In addition to requests in the query language,
-the Overpass API also offers some ready-made API calls.
-The majority of them exists for the purpose of backwards compatibility,
-and all of them are emulated by executing the corresponding Overpass QL request.
-They thus only need coordinates.
+На додачу до мови запитів, Overpass API також пропонує готові до
+використання виклики API.
+Більшість з них наявна для підтримання зворотньої сумісності та
+всі вони виконують відповідні запити мовою Overpass QL.
+Для їх використання потрібні лише координати.
 
 <a name="map"/>
-## The Export of the Main Site
+## Експорт, функція на openstreetmap.org
 
-In the [export tab](https://openstreetmap.org/export) of the [OSM main site](https://openstreetmap.org),
-there is a feature to export all data by Overpass API.
-It adheres to the semantics of the OSM main site,
-but it can export substantially larger extracts.
-This is driven by a simple URL:
+Меню [Експорт](https://openstreetmap.org/export) на [головній сторінці сайту OSM](https://openstreetmap.org) містить елемент, яких дозволяє
+отримати дані з поточного виду за допомогою Overpass API.
+Він дотримується семантики основного сайту OSM,
+але він може експортувати значно більші вибірки.
+Цей виклик виглядає так:
 
 [/api/map?bbox=-0.001,51.477,0.001,51.478](https://overpass-api.de/api/map?bbox=-0.001,51.477,0.001,51.478)
 
-Here the order of the coordinates is in the style of legacy interfaces:
-western edge, southern edge, eastern edge, northern edge.
-Please note that it is different from the standard order in Overpass QL.
+Зверніть увагу на порядок зазначення координат:
+захід, південь, схід, північ.
+Зауважте що в стандартних запитах Overpass QL використовується інший порядок координат.
 
-This API call executes the [following request](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=17&Q=CGI_STUB):
+Цей виклик API виконує наступний [запит](https://overpass-turbo.eu/?lat=51.4775&lon=0.0&zoom=17&Q=CGI_STUB):
 
     ( node(51.477,-0.001,51.478,0.001);
       way(bn);
@@ -36,19 +36,18 @@ This API call executes the [following request](https://overpass-turbo.eu/?lat=51
     );
     out meta;
 
-Thus the result contains:
+Таким чином, результат містить:
 
-1. all nodes in the given bounding box
-1. all ways that have at least one node in this bounding box
-1. all nodes used by these ways
-1. all relations that contain one or more elements from (1.) to (3.) as members
-1. all relations that contain one or more relations from (4.) as members
+1. всі точки із заданого прямокутника
+1. всі лінії, які мають хоча б одну точку в цьому прямокутнику
+1. всі точки знайдених ліній
+1. всі зв'язки, які містять хоча б один елемент з попередніх пунктів у вигляді їх членів
+1. всі зв'язки, які містять зв'язки із попереднього пункту у вигляді їх членів
 
-and it is printed the degree of detail with version and timestamp.
+до всіх знайдених елементів додається номер їх версії та час останньої зміни.
 
-Not contained are ways that cross the bounding box without having any node inside the bounding box.
-How to fix that problem is explained in the [preceding subsection](osm_types.md#full),
-in particular in the section _Grand Total_.
+Лінії, що перетинають зазначений прямокутник, але які не мають в ньому точок не включаються до вибірки.
+Вирішення такої ситуації описано в [попередньому розділі](osm_types.md#full), в параграфі _Підсумки_.
 
 <a name="xapi"/>
 ## Xapi
