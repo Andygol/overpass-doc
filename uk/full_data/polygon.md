@@ -1,98 +1,94 @@
-Polygon and Around
-==================
+Фільтри Polygon та Around
+=========================
 
-Where to filter can be shaped more versatile than with a bounding box.
+Окрім звичайного обмежувального прямокутника для обмеження виводу
+можуть використовуватись більш універсальні способи.
 
-Coordinates in degrees of latitude and longitude are easy to understand as a concept,
-but few people can recall latitude and longitude of their locations of interest.
-For this reason we first present spatial selection by known objects.
+Координати в градусах широти та довготи легко зрозуміти як поняття,
+але мало хто може пригадати широту та довготу своїх місць інтересу.
+Тому ми спочатку представляємо просторовий відбір за відомими об’єктами.
 
-Although the selection of all objects within a known area is outstandingly frequent,
-it is presented in [its own section](area.md),
-because a couple of caveats apply.
+Хоча й вибір усіх об’єктів у відомій області є надзвичайно
+популярним, але він розглядається у [власному розділі](area.md), бо має певні застереження.
 
-This section starts with a subsection how to
-filter for the objects in proximity to known and selected objects.
-The subsequent section is about filtering for objects in proximity of given coordinates.
-The section concludes by presenting
-how to filter by a polygon or multipolygon as an outline.
+Розпочнемо цей розділ частиною про те, як шукати об'єкти поблизу 
+відомих, чи вже вибраних об'єктів.
+Наступна частина присвячена вибору об'єктів поблизу заданих координат.
+Наприкінці ми розглянемо як шукати об'єкти, які знаходяться в межах багатокутника.
 
 <a name="around"/>
-## Filter Relative to Selected Objects
+## Фільтр за вибраними об'єктами
 
-It is a sophisticated task
-to conclude from a couple of words to a specific location.
-For this reason this job ought be done a proper geocoder, e.g. [Nominatim](../criteria/nominatim.md#nominatim);
-thus we do not pursue that here.
-The power of Nominatim can be combined with Overpass API by the search by coordinate,
-and this is the topic of the next section.
+Це складне завдання
+зробити висновок із кількох слів що до певного місця.
+Тому це робота для геокодера, наприклад [Nominatim](../criteria/nominatim.md#nominatim);
+тож ми не будемо зупинятись на цьому тут.
+Потужність Nominatim можна поєднати з Overpass API шляхом пошуку за координатами,
+і це тема наступного розділу.
 
-Nonetheless, in many cases a name alone already [identifies](https://overpass-turbo.eu/?lat=51.0&lon=10.0&zoom=6&Q=CGI_STUB) the desired object:
+Однак, у багатьох випадках назви об'єкту може бути достатньо для його [ідентифікації](https://overpass-turbo.eu/?lat=51.0&lon=10.0&zoom=6&Q=CGI_STUB):
 
     nwr[name="Kölner Dom"];
     out geom;
 
-In line 1 we select all objects
-that have a tag `name` with value `Kölner Dom`.
-These are stored in the set `_`.
-In line 2 the statement `out geom` prints all the objects that are in the set `_`.
+Першим рядком ми шукаємо всі об'єкти
+теґ `name` яких містить значення `Kölner Dom`.
+Результати зберігаються в стандартній змінній виводу `_`.
+Рядок 2 містить вираз `out geom` для показу всіх знайдених об'єктів, які зберігаються у змінній `_`.
 
-Please recall that [the magnifying glass](../targets/turbo.md#basics) zooms to the results.
-In particular for indirect filters, it makes sense to
-run the leading object search first,
-because there may exist objects of the same name [in unexpected places](https://overpass-turbo.eu/?lat=51.0&lon=10.0&zoom=6&Q=CGI_STUB):
+Нагадуємо, що до результатів пошуку можна перейти натиснувши на 
+[значок 🔎](../targets/turbo.md#basics) на панелі інструментів ліворуч.
+У випадку застосування непрямих фільтрів спочатку має сенс зробити 
+пошук основного елемента, через те що може існувати кілька об'єктів
+з однаковою назвою [в несподіваних місцях](https://overpass-turbo.eu/?lat=51.0&lon=10.0&zoom=6&Q=CGI_STUB):
 
     nwr[name="Viktualienmarkt"];
     out geom;
 
-A [bounding box](bbox.md#filter) or using an enclosing area [can help](https://overpass-turbo.eu/?lat=48.0&lon=11.5&zoom=10&Q=CGI_STUB):
+[Обмежувальний прямокутник](bbox.md#filter) або опис території пошуку [можуть згодитись](https://overpass-turbo.eu/?lat=48.0&lon=11.5&zoom=10&Q=CGI_STUB):
 
     area[name="München"];
     nwr(area)[name="Viktualienmarkt"];
     out geom;
 
-The desired object or objects are selected as set `_` after line 2.
+Пошук бажаних об'єктів виконується в рядку 2 та записується в змінну `_`.
 
-We can now find all objects within 100 meters distance [around the](https://overpass-turbo.eu/?lat=50.94&lon=6.96&zoom=14&Q=CGI_STUB) Kölner Dom:
+Також ми можемо шукати об'єкти на відстані, наприклад, знайдемо
+всі об'єкти в радіусі 100 метрів [навколо](https://overpass-turbo.eu/?lat=50.94&lon=6.96&zoom=14&Q=CGI_STUB) Кельнського собору (Kölner Dom):
 
     nwr[name="Kölner Dom"];
     nwr(around:100);
     out geom;
 
-Against our expectations, but for good reason,
-Overpass Turbo warns that the size of the result is big.
-It is not immediately clear
-why railway tracks between Paris and Brussels, hundreds of kilometers away,
-should be considered to be close to the Kölner Dom.
-The problems are relations of substantial spatial extent,
-in this case railway services.
-Given that this is [hardly better](https://overpass-turbo.eu/?lat=48.135&lon=11.575&zoom=14&Q=CGI_STUB) close to the Viktualienmarkt
-due to hiking and cycling routes ...
+Всупереч нашим очікуванням, але не дарма,
+Overpass Turbo попереджає, що розмір результату великий.
+З першого погляду не зрозуміло, який зв'язок між залізничними коліями між Парижем та Брюсселем в сотнях кілометрів та Кельнським собором.
+Проблемою є зв'язки, які простягаються дуже далеко, тут це залізничні маршрути.
+Враховуючи це, знаходження пішохідних та велосипедних маршрутів поруч з 
+Viktualienmarkt [не на багато краще](https://overpass-turbo.eu/?lat=48.135&lon=11.575&zoom=14&Q=CGI_STUB)…
 
     area[name="München"];
     nwr(area)[name="Viktualienmarkt"];
     nwr(around:100);
     out geom;
 
-... it ought be conjectured that the problem occurs frequently.
-This tightly limits the use of the _around_ filter as a filter without further criteria.
+… варто зазначити, що такі випадки не поодинокі.
+Це жорстко обмежує використання фільтра _around_ як фільтра без додаткових критеріїв.
 
-On the technical level,
-we again have our object to be used as reference before line 3 in the set `_`.
-The statement `around` now selects from all the objects those
-that have to at least one of the objects in the set `_` a distance from at most the provided value `100` in meters.
+З технічного боку, ми, знов таки ж, має об'єкти, які будуть використані,
+як відправна точка у змінній `_` перед рядком 3.
+Вираз `around` тепер буде шукати всі об'єкти, які знаходяться на 
+відстані до `100` метрів від об'єктів зі змінної `_`.
 
-An entire [subsection](../criteria/chaining.md#lateral) is devoted to piping statements,
-and sets have been explained in [the preface](../preface/design.md#sets).
-The example [there in the beginning](../preface/design.md#sequential) shows an application of the _around_ filter
-that is helpful
-because it [combines](../criteria/union.md#intersection) the filter with a filter for a tag.
-Tools to cope with overly large amounts of data have been discussed in the section [Geometries](osm_types.md#full).
+ Конвеєризації присвячено цілий [підрозділ](../criteria/chaining.md#lateral), а про змінні йшлося у [вступі](../preface/design.md#sets).
+В прикладі [на початку](../preface/design.md#sequential) показується застосування фільтра _around_.
+В прикладі [на початку](../preface/design.md#sequential) показується застосування фільтра _around_ [разом із фільтруванням за теґами](../criteria/union.md#intersection).
+Про інструменти для опрацювання великих обсягів даних було в розділі [Геометрія](osm_types.md#full).
 
-Another possible solution to at least display a meaningful subset of data,
-is to filter for _ways_ instead of all objects
-and to select the _relations_ that refer to this ways without asking for their geometry.
-For the [Kölner Dom](https://overpass-turbo.eu/?lat=50.94&lon=6.96&zoom=14&Q=CGI_STUB):
+Іншим можливим рішенням, яке можете дозволити принаймні значущу частину 
+даних, є вибірка по _лінях_ замість вибірки по всіх об'єктах з наступним 
+пошуком _зв'язків_, що посилаються на лінії без запитування їх геометрії.
+Для [Кельнського собору (Kölner Dom)](https://overpass-turbo.eu/?lat=50.94&lon=6.96&zoom=14&Q=CGI_STUB):
 
     nwr[name="Kölner Dom"];
     way(around:100);
@@ -100,44 +96,41 @@ For the [Kölner Dom](https://overpass-turbo.eu/?lat=50.94&lon=6.96&zoom=14&Q=CG
     rel(bw);
     out;
 
-Line 1 puts the named objects into the set `_`.
-Line 2 selects all _ways_
-that have to at least one of the objects in the set `_` a distance of at most 100 meters;
-the result replaces the content of the set `_`.
-Line 3 prints the result of set `_`, i.e. the in line 2 selected ways.
-Line 4 selects all _relations_
-that have at least one of the ways in `_` as a member
-and replaces the content of `_` with that selection.
-In line 5 the content of `_` is printed, i.e. the found relations,
-but in contrast to line 3 no coordinates are amended -
-this shrinks the _relations_ to a size
-that is easier to handle.
+Рядок 1 передає всі об'єкти з вказаною назвою до змінної `_`.
+Рядок 2 шукає всі _лінії_, які мають принаймні один елемент у змінній `_` на відстані до 100 метрів;
+а результат замінює вміст змінної `_`.
+Рядок 3 виводить результат змінної `_`, тобто показує лінії знайдені в рядку 2.
+Рядок 4 шукає всі _зв'язки_, які мають принаймні одну лінію зі змінної `_` та перезаписує вміст змінної `_`.
+Рядок 5 - вивід результатів зі змінної `_`, тобто знайдені зв'язки, але
+на відміну від рядка 3, без координат, що зменшує розмір даних _зв'язків_
+до розумних обсягів.
+
 
 <a name="absolute_around"/>
-## Filter Around Absolute Coordinates
+## Фільтр Around навколо координат
 
-It can be searched not only around the given objects, but also around the given coordinates.
-An example close to Greenwich [on the prime meridian](https://overpass-turbo.eu/?lat=51.477&lon=0.0&zoom=15&Q=CGI_STUB):
+Пошук можна робити не тільки навколо якогось об'єкту, а й 
+навколо заданих координат.
+Приклад пошуку у неподалік [початкового меридіана](https://overpass-turbo.eu/?lat=51.477&lon=0.0&zoom=15&Q=CGI_STUB) в Гринвічі:
 
     nwr(around:100,51.477,0.0);
     out geom;
 
-Line 1 employs the filter in question:
-This query selects all objects into the set `_`
-that have to the given coordinate a distance of at most 100 meters.
-Line 2 prints the content of the set `_`.
+Рядок 1 показує як застосовується фільтр.
+Результати, які знаходиться від заданих координат на відстані до 100 
+метрів, записуються до змінної `_`.
 
-The same warnings as for all other full data searches with _relations_ do apply:
-very quickly you are flooded with very much data.
-Fortunately, the reduction tricks of [bounding boxes](osm_types.md#full) and [from the last section](#around) do apply here, too.
+Ви побачите теж саме попередження, що й для інших запитів з нечіткими обмеженнями щодо _зв'язків_,
+досить швидко ви отримаєте купу зайвих даних.
+На щастя, прийомчики з [обмежувальним прямокутником](osm_types.md#full) та [фішки з попереднього розділу](#around) можна застосовувати й тут.
 
-Nobody is obliged to search for _relations_.
-You can as well search only for _nodes_, [only for _ways_](https://overpass-turbo.eu/?lat=51.477&lon=0.0&zoom=15&Q=CGI_STUB) ...
+Скоріш за все вам не потрібно шукати _зв'язки_.
+Ви можете шукати _точки_, з яких [складаються _лінії_](https://overpass-turbo.eu/?lat=51.477&lon=0.0&zoom=15&Q=CGI_STUB) ...
 
     way(around:100,51.477,0.0);
     out geom;
 
-... or only for [_nodes_ and _ways_](https://overpass-turbo.eu/?lat=51.477&lon=0.0&zoom=15&Q=CGI_STUB):
+… чи тільки [_точки_ та _лінії_](https://overpass-turbo.eu/?lat=51.477&lon=0.0&zoom=15&Q=CGI_STUB):
 
     (
       node(around:100,51.477,0.0);
@@ -145,15 +138,16 @@ You can as well search only for _nodes_, [only for _ways_](https://overpass-turb
     );
     out geom;
 
-Here we use an _union_ statement (will be introduced [later](../criteria/union.md#union))
-to add the results of the quest for _nodes_ to the results of the quest for _ways_.
-The statements in lines 2 and 3 each filter for an object type by an _around_ filter.
-And the _union_ statement combines both into the final selection into the set `_`.
+Тут ми використовуємо вираз _union_ (про це [згодом](../criteria/union.md#union))
+для поєднання результатів запиту для отримання _точок_ з результатами запиту _ліній_.
+У виразі, в рядках 2 та 3 для кожного типи об'єктів використовується
+фільтр _around_.
+А конструкція _union_ поєднує обидва результати в одній фінальній `_`.
 
-This approach can handle a radius of 1000 and more meters
-and still delivers not too much data.
+В такий спосіб можна запитувати дані в радіусі 1000 та більше метрів 
+і все одно отримувати не багато даних.
 
-Relations can be [amended](https://overpass-turbo.eu/?lat=51.477&lon=0.0&zoom=15&Q=CGI_STUB) like above without geometry:
+Зв'язки можна [отримувати](https://overpass-turbo.eu/?lat=51.477&lon=0.0&zoom=15&Q=CGI_STUB), як і вище, без геометрії:
 
     (
       node(around:1000,51.477,0.0);
@@ -163,16 +157,13 @@ Relations can be [amended](https://overpass-turbo.eu/?lat=51.477&lon=0.0&zoom=15
     rel(<);
     out;
 
-The set `_` still contains before line 5 the result of the _union_ statement.
-The filter `(<)` only admits objects
-that have at least one object from its input as a member.
-These are amongst the relations exactly those that have components within the search radius.
+Змінна `_` включно до рядка 5 містить дані з виразу _union_.
+Фільтр `(<)` викликає об'єкти, які містять хоча б один елемент в стандартному виводі.
+Це саме ті зв'язки, які мають членів в радіусі пошуку.
 
-We conclude with yet another tool for searches that do not fit well into a bounding box:
-One can search in the proximity of a polyline.
-For this purpose one defines a path over two or more coordinates,
-and then all objects are found
-that have a [lower distance to that path](https://overpass-turbo.eu/?lat=51.477&lon=0.0&zoom=13&Q=CGI_STUB) than the given value:
+Закінчимо ми ще одним інструментом, який не вписується в поняття 
+обмежувального прямокутника – ми можемо шукати поблизу полілінії.
+Для цього визначається лінія за двома чи більше координатами, а потім шукаються усі об'єкти, [відстань до яких менше заданого значення](https://overpass-turbo.eu/?lat=51.477&lon=0.0&zoom=13&Q=CGI_STUB):
 
     (
       node(around:100,51.477,0.0,51.46,-0.03);
@@ -182,42 +173,36 @@ that have a [lower distance to that path](https://overpass-turbo.eu/?lat=51.477&
     rel(<);
     out;
 
-In comparison to the preceding query, only lines 2 and 3 have changed;
-the coordinates are written one after another separated by commas.
+У порівнянні з попереднім запитом змінилися лише рядки 2 і 3;
+координати записуються одна за одною через кому.
 
 <a name="polygon"/>
-## Polygons as Filters
+## Фільтр за полігонами
 
-Another method to handle free-form areas of interest is to search by a self-defined polygon.
-Again, this helps if the area of interest does not well fit into a bounding box.
+Іншим методом обробки областей інтересу довільної форми є пошук за самовизначеним багатокутником.
+Знову ж таки, це допомагає, якщо область інтересу погано вписується в  обмежувальний квадрат.
 
-[Areas](area.md) already cover many use cases
-by enabling the search exactly within a named area.
-But when it comes to slightly extend such areas
-or to cut out arbitrary free forms
-then it is inevitable to use an explicit polygon as the boundary.
+[Area](area.md) вже охоплює багато варіантів використання пошуку, 
+обмеженого територією з певною назвою.
+Але коли мова заходить про території довільної форми, які не мають якоїсь назви, то ми неминуче повинні використовувати багатокутник довільної форми, як межу.
 
-For illustrative purposes, a search only for nodes [with a triangle as boundary](https://overpass-turbo.eu/?lat=51.477&lon=0.0&zoom=14&Q=CGI_STUB) is presented
-such that the form of the polygon can be spotted on the map:
+Продемонструємо це [пошуком в точок в трикутнику](https://overpass-turbo.eu/?lat=51.477&lon=0.0&zoom=14&Q=CGI_STUB), який можна добре побачити на мапі з результатами:
 
     node(poly:"51.47 -0.01 51.477 0.01 51.484 -0.01");
     out geom;
 
-In line 1 we search for _nodes_
-and the filter `(poly:...)` only admits objects
-that are situated within the inside the quotation marks noted polygon.
-This polygon is a list of coordinates of the form latitude-longitude
-where between the numbers is only whitespace allowed.
-After the final coordinate, the Overpass API always adds the edge to close the polygon.
+Рядок 1, ми шукаємо _точки_, а фільтр `(poly:...)` допускає лише об'єкти, які розташовані всередині позначеного в лапках багатокутника.
+Цей багатокутник являє собою список координат у формі широта-довгота, де роздільниками між числами допускаються лише пробіли.
+Після останньої координати API Overpass завжди додає ребро, щоб закрити багатокутник.
 
-Very much data is produced by [the search for all three types of objects](https://overpass-turbo.eu/?lat=51.477&lon=0.0&zoom=14&Q=CGI_STUB):
+[Пошук усіх трьох типів об'єктів](https://overpass-turbo.eu/?lat=51.477&lon=0.0&zoom=14&Q=CGI_STUB) повертає дуже багато даних:
 
     nwr(poly:"51.47 -0.01 51.477 0.01 51.484 -0.01");
     out geom;
 
 
-Like [before](#around) this can be mitigated by the two steps _nodes_ plus _ways_ and then reverse resolution of the _relations_.
-The data reduction is effected by [avoiding the geometry](https://overpass-turbo.eu/?lat=51.477&lon=0.0&zoom=14&Q=CGI_STUB) of the _relations_:
+Як і [вище](#around) цього можна уникнути, якщо шукати спочатку _точки_ та _лінії_, а вже потім шукати _зв'язки_, які їх містять.
+Зменшення обсягу даних досягається шляхом [відкидання геометрії](https://overpass-turbo.eu/?lat=51.477&lon=0.0&zoom=14&Q=CGI_STUB) _зв'язків_:
 
     (
       node(poly:"51.47 -0.01 51.477 0.01 51.484 -0.01");
@@ -227,12 +212,12 @@ The data reduction is effected by [avoiding the geometry](https://overpass-turbo
     rel(<);
     out;
 
-Can the search area contain holes or have multiple components?
+Чи може область пошуку містити отвори або мати кілька компонентів?
 
-Multiple components can be realized by an _union_ statement.
-Because _union_ statements can contain any number of statements,
-we can just write the _query_ statements for the components one after another.
-The [_nodes_ and _ways_ variant](https://overpass-turbo.eu/?lat=51.487&lon=0.0&zoom=13&Q=CGI_STUB):
+Багатокомпонентний пошук можна здійснювати використовуючи конструкцію  _union_.
+Оскільки _union_ може мати довільну кількість членів,
+ми можемо додати до неї _запит_ для кожного компоненту.
+У випадку [пошуку _точок_ та _ліній_](https://overpass-turbo.eu/?lat=51.487&lon=0.0&zoom=13&Q=CGI_STUB):
 
     (
       node(poly:"51.47 -0.01 51.477 0.01 51.484 -0.01");
@@ -244,32 +229,41 @@ The [_nodes_ and _ways_ variant](https://overpass-turbo.eu/?lat=51.487&lon=0.0&z
     rel(<);
     out;
 
-The outline is stated here twice,
-once for the _node_ query and once for the _way_ query.
-Unfortunately, there is currently no way around this.
+Контур зазначається двічі,
+один раз - для _точок_, другий - для _ліній_.
+Обійти подвійний запис можна скориставшись [скороченням `nw` для отримання точок та ліній](https://overpass-turbo.eu/?lat=51.487&lon=0.0&zoom=13&Q=CGI_STUB).
 
-For holes, it might be tentative to use the block statement [difference](../criteria/chaining.md#difference).
-That statement prunes as well the objects that lie partly in the desired polygon and partly in the hole,
-because both arguments of the difference match those objects.
+    (
+      nw(poly:"51.47 -0.01 51.477 0.01 51.484 -0.01");
+      nw(poly:"51.491 -0.01 51.498 -0.03 51.505 -0.01");
+    );
+    out geom;
+    rel(<);
+    out;
 
-Instead, one can duplicate the vertex on the outer line
-that is closest to the hole.
-Then one can insert the vertex sequence describing the hole between these two vertices.
+Для отворів можливо скористатись виразом [difference](../criteria/chaining.md#difference).
+Цей твердження також обрізає об'єкти, які частково знаходяться в потрібному багатокутнику, і частково - в отворі,
+оскільки обидва аргументи виразу difference відповідають цим об'єктам.
 
-If we, for example, want to cut out from the triangle `51.47 -0.01 51.477 0.01 51.484 -0.01`
-the triangle `51.483 -0.0093 51.471 -0.0093 51.477 0.008` then
+Замість цього можна продублювати вершину на зовнішній лінії, що 
+найближча до отвору.
+Потім можна вставити послідовність вершин, що описує отвір між цими 
+двома вершинами.
 
-* We first duplicate the closest vertex `51.484 -0.01`,
-  thus have the sequence `51.47 -0.01 51.477 0.01 51.484 -0.01 51.484 -0.01`.
-* Repeat the first vertex of the hole at its end,
-  thus get for the hole the sequence `51.483 -0.0093 51.471 -0.0093 51.477 0.008 51.483 -0.0093`.
-* Insert the hole description between the two copies of the duplicated vertex:
+Наприклад, якщо ми хочемо вирізати трикутник `51.47 -0.01 51.477 0.01 51.484 -0.01`
+з трикутника `51.483 -0.0093 51.471 -0.0093 51.477 0.008`, тоді
+
+* Спочатку продублюємо найближчу вершину `51.484 -0.01`,
+  що дасть нам послідовність `51.47 -0.01 51.477 0.01 51.484 -0.01 51.484 -0.01`.
+* Повторимо першу вершину отвору на його кінці,
+  таким чином отримуємо для отвору послідовність `51.483 -0.0093 51.471 -0.0093 51.477 0.008 51.483 -0.0093`.
+* Вставимо опис отвору між двома копіями продубльованої вершини:
   `51.47 -0.01 51.477 0.01 51.484 -0.01 51.483 -0.0093 51.471 -0.0093 51.477 0.008 51.483 -0.0093 51.484 -0.01`
 
-For the sake of Illustration the [final request](https://overpass-turbo.eu/?lat=51.477&lon=0.0&zoom=14&Q=CGI_STUB).
-This request works as well for all the other object types
-and multiple query statements can be combined by an _union_ statement.
-But then one sees worse the actually selected area:
+Ось як виглядатиме [запит](https://overpass-turbo.eu/?lat=51.477&lon=0.0&zoom=14&Q=CGI_STUB).
+Цей запит також працює для всіх інших типів об'єктів,
+а кілька запитів можна об'єднати за допомогою конструкції _union_.
+Але тоді доволі складно розібрати виділену ділянку:
 
     node(poly:"51.47 -0.01 51.477 0.01 51.484 -0.01
       51.483 -0.0093 51.471 -0.0093 51.477 0.008
