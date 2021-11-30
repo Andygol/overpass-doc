@@ -1,9 +1,9 @@
-Alternatives
+Альтернативи
 ============
 
-The Overpass API searches faithfully for OpenStreetMap data.
-Sometimes, a more intelligent search is necessary, the so-called geocoding.
-This is where _Nominatim_ and others fare much better.
+API Overpass робить точний пошук по даних OpenStreetMap.
+Але іноді потрібний більш розумний пошук, так зване геокодування.
+Ось де _Nominatim_ та інші працюють набагато краще.
 
 <a name="nominatim"/>
 ## Nominatim
