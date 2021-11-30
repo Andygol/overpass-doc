@@ -1,181 +1,182 @@
-Filter by area
-==============
+Фільтр за територіями
+=====================
 
-How to get all data within a named area, e.g. a city or a county.
+Тут пояснюється, як отримати дані для якоїсь поіменованої території, наприклад міста чи громади.
 
 <a name="deprecation"/>
-## Deprecation warning
+## Попередження про припинення підтримки
 
-This manual claims
-that its content remains valid for many years.
-This does not necessarily apply to the current model of _areas_:
-The datatype has been created to remain compatible
-if a datatype for areas ever had appeared.
-I'm nowadays pretty sure that this will never happen.
+У цьому посібнику стверджується,
+що його зміст залишається чинним протягом багатьох років.
+Це не обов’язково стосується поточної моделі _area_.
+Цей тип даних було створено, щоб бути сумісним у випадку його появи в OpenStreetMap.
+У автора є сумніви, що він колись там з'явиться.
 
-Thus, I now plan to directly work with the de facto types of _closed way_ and _closed relation_,
-essentially equal to a _multipolygon_.
-The implementation may take some years,
-but in the end some of the syntax variants listed here will become outdated.
-For the sake of [backwards compatibility](../preface/assertions.md#infrastructure),
-as few syntax variants as possible will be removed.
+Тож, зараз є плани зосередитись над наявними типами _closed way_ та _closed relation_,
+що по суті представлено як _multipolygon_.
+Реалізація може зайняти кілька років,
+і в кінцевому підсумку деякі з перерахованих тут варіантів синтаксису стануть застарілими.
+За для підтримання [зворотньої сумісності](../preface/assertions.md#infrastructure),
+не всі варіанти синтаксису будуть вилучені.
 
-Since version 0.7.57, _ways_ have already been changed,
-but _relations_ remain with the generated data type for the time being.
+Починаючи з версії 0.7.57, _лінії_ вже зазнали змін,
+але _зв'язки_ залишаються зі згенерованими типом даних.
 
-The statement `is_in` and queries with type `area` now return closed ways and areas generated from _relations_.
-Conversely, the criterion `area` evaluates both closed ways and generated areas.
-The criterion `(pivot)` and the statement `map_to_area` pass closed _ways_ unchanged through
-and only convert between the _relations_ and the areas generated from them.
+Вираз `is_in` та запити з типом `area` зараз повертають замкнені лінії
+та полігони, що утворюються зі _зв'язків_.
+І навпаки, критерій `area` аналізує як замкнені лінії, так і згенеровані полігони.
+Критерій `(pivot)` та вираз `map_to_area` пропускають  замкнені _лінії_
+без змін, і лише виконують перетворення між _зв'язками_ та полігонами, створеними з них.
 
-There is no specific timetable for also converting the _relations_.
-There are many more pressing issues in the project,
-thus this change may not happen anytime soon.
+Конкретних планів щодо роботи по переробці _зв'язків_ немає.
+У проєкті ще є багато нагальних питань,
+тому ці зміни можуть відбутись не скоро.
 
 <a name="per_tag"/>
-## per Name or per Tag
+## Назви чи Теґи
 
-The typical use case for areas in the Overpass API is
-to download all objects of a certain type or all objects in general in a named area of interest.
-We start with objects of a rather sparse type,
-all kinds of objects are too many data
-to get quick responses to requests for exercising the syntax.
-Once the _area_ mechanism is introduced in this section,
-the download of all objects follows in the [next subsection](#full).
+Типовим варіантом використання областей в Overpass API є завантаження 
+всіх об’єктів певного типу або всіх об’єктів загалом у потрібній області 
+інтересу.
+Почнемо з об'єктів досить розрідженого типу,
+всі види об'єктів – це занадто багато даних
+щоб отримати швидкі відповіді на запити з таким синтаксисом.
+Після того, як механізм _area_ буде пояснений у цьому розділі, докладніше
+про завантаження всіх об'єктів буде в [наступному підрозділі](#full).
 
-We first want to display [all supermarkets in London](https://overpass-turbo.eu/?lat=30.0&lon=0.0&zoom=2&Q=CGI_STUB):
+Для початку, ми знайдемо [всі супермаркети в Лондоні](https://overpass-turbo.eu/?lat=30.0&lon=0.0&zoom=2&Q=CGI_STUB):
 
     area[name="London"];
     nwr[shop=supermarket](area);
     out center;
 
-The actual work is done in line 2:
-the _filter_ `(area)` there restricts the found objects
-to those that are partly or completely within one or more of the areas in the set `_`.
-Thus we must first bring our areas of interest into the set `_`.
+Насправді вся робота з пошуку відбувається у рядку 2,
+_фільтр_ `(area)` обмежує обсяг потрібних об'єктів тими, що повністю
+або частково знаходяться в поіменованому полігоні змінної `_`.
+Тож для початку ми маємо помістити нашу область інтересу у змінну `_`.
 
-Line 1 selects all objects of the type _area_
-that have a tag with key `name` and value `London`.
-This object type is explained [later](#background).
-By the way, the whole statement is still a [_query_ statement](../preface/design.md#statements).
+Рядок 1 шукає всі об'єкти типу _area_
+з ключем `name` та значенням `London`.
+Пояснення для цього об'єкта дивіться [далі](#background).
+До речі, весь вираз все ще є виразом [_query_](../preface/design.md#statements).
 
-Unexpectedly, many results pop up across half of the planet.
-This is because there are many areas named `London`;
-we need to express that we want only the big London in England.
-There are five different ways to make our request more precise.
+Несподівано ми отримуємо багато результатів з половини планети.
+Це тому, що у світі багато місць, які називаються `London`;
+нам потрібно зазначити, що нам потрібен Лондон в Англії.
+Є п’ять різних способів зробити наш запит більш точним.
 
-We can draw a huge bounding box around the approximate target region
-and can pose [the request](https://overpass-turbo.eu/?lat=30.0&lon=0.0&zoom=2&Q=CGI_STUB):
+Ми можемо зазначити величезний обмежувальний прямокутник, що містить нашу
+область інтересу та спробувати такий [запит](https://overpass-turbo.eu/?lat=30.0&lon=0.0&zoom=2&Q=CGI_STUB):
 
     area[name="London"];
     nwr[shop=supermarket](area)(50.5,-1,52.5,1);
     out center;
 
-Please note for your convenience
-that the bounding box can be [computed automatically](https://overpass-turbo.eu/?lat=51.5&lon=-0.1&zoom=10&Q=CGI_STUB) with the [convenience feature](../targets/turbo.md#convenience) of _Overpass Turbo_:
+Зауважте, що координати обмежувального прямокутника можуть бути
+[отримані автоматично](https://overpass-turbo.eu/?lat=51.5&lon=-0.1&zoom=10&Q=CGI_STUB) за допомогою використання [зручностей](../targets/turbo.md#convenience) _Overpass Turbo_:
 
     area[name="London"];
     nwr[shop=supermarket](area)({{bbox}});
     out center;
 
-In both cases, the bounding box acts as a filter in parallel to the `(area)` filter.
-For the as temporary intended filter `(area)`, a bounding box has never been implemented.
-But that this can be mitigated in the just explained way
-also contributed to that it never got priority.
+В обох випадках, обмежувальний прямокутник працює як фільтр в парі з фільтром `(area)`.
+Через те що фільтр `(area)` є тимчасовою імплементацією, для нього ніколи не додавалась можливість зазначати координати обмежувального прямокутника.
+Але це добре виправляється показаним вище спосіб, тож це також вплинуло на низький пріоритет для реалізації цієї функції.
 
-In a similar way we can take advantage of that London is in Great Britain.
-A [later subsection](#combining) will present all possibilities for that.
+Подібним чином ми можемо скористатися тим, що Лондон знаходиться у Великобританії.
+В одному з [наступних підрозділів](#combining) буде показано як таке зробити.
 
-Last but not least we can take further tags into account
-to discriminate between multiple _areas_ with the same _name_ tag.
-In the case of London the tag with the key _wikipedia_ [helps out](https://overpass-turbo.eu/?lat=30.0&lon=0.0&zoom=2&Q=CGI_STUB):
+І останнє, але не менш важливе, ми можемо взяти до уваги інші теґи
+щоб розрізняти декілька _area_ з однаковим теґом _name_.
+У випадку з Лондоном [може згодитись](https://overpass-turbo.eu/?lat=30.0&lon=0.0&zoom=2&Q=CGI_STUB) теґ _wikipedia_:
 
     area[name="London"]["wikipedia"="en:London"];
     nwr[shop=supermarket](area);
     out center;
 
-Like the first filter by tag `[name="London"]`,
-the second filter is applied to the query in the first line.
-This way here remains only the one _area_ object
-in which we actually wanted to search.
+Так само, як і перший фільтр `[name="London"]`,
+наступний фільтр застосовується у першому рядку запиту.
+Таким чином у нас залишається тільки один об'єкт _area_, який ми й
+шукали.
 
-Other often useful tags for filtering are `admin_level` with or without a value or `type=boundary`.
-To this end, it helps to first [display](https://overpass-turbo.eu/?lat=51.5&lon=-0.1&zoom=10&Q=CGI_STUB) and scrutinize all the found _area_ objects;
-please switch after `Run` to the `Data` view by the tab in the upper right corner:
+Іншим доволі корисним теґом може бути теґ `admin_level` разом або без
+додаткового теґу `type=boundary`.
+Тут може допомогти, спочатку, [показ](https://overpass-turbo.eu/?lat=51.5&lon=-0.1&zoom=10&Q=CGI_STUB) та докладне вивчення об'єктів _area_;
+для цього після `Run` перейдіть на вкладку `Data` у верхньому куті праворуч:
 
     area[name="London"];
     out;
 
-In line 2 it is printed what has been selected in line 1.
-Please check the results for which _tags_ or combinations of _tags_ are unique the area of interest.
-By using the _pivot_ filter,
-you also can [visualize](https://overpass-turbo.eu/?lat=30.0&lon=0.0&zoom=2&Q=CGI_STUB) them:
+Рядок 2 виводить результати пошук з рядка 1.
+Відшукайте ті _теґи_ та їх комбінації, що є унікальними для області інтересу.
+А використовуючи фільтр _pivot_,
+у вас є змога їх [візуалізувати](https://overpass-turbo.eu/?lat=30.0&lon=0.0&zoom=2&Q=CGI_STUB):
 
     area[name="London"];
     nwr(pivot);
     out geom;
 
-Line 2 constitutes a regular _query_ statement.
-The filter `(pivot)` there selected exactly those objects
-that are generators of the _areas_ in its input.
-This is the set `_`, and it is filled in line 1.
+Рядок 2 містить звичайний вираз _query_.
+Фільтр `(pivot)` тут вибирає саме ті об'єкти, 
+які згенеровано на виході генератора _area_.
+Вони знаходяться у змінній `_`.
 
-The fifth possibility is a convenience feature of [Overpass Turbo](../targets/turbo.md)
-to [let choose](https://overpass-turbo.eu/?lat=51.5&lon=-0.1&zoom=10&Q=CGI_STUB) _Nominatim_ the right area:
+П'ята можливість - це зручна функція [Overpass Turbo](../targets/turbo.md)
+як [дозволяє обрати](https://overpass-turbo.eu/?lat=51.5&lon=-0.1&zoom=10&Q=CGI_STUB) _Nominatim_ для пошуку потрібної області інтересу:
 
     {{geocodeArea:London}};
     nwr[shop=supermarket](area);
     out center;
 
-Here the expression `{{geocodeArea:London}}` triggers
-that _Overpass Turbo_ asks _Nominatim_ for the most plausible object for the name `London`.
-By using the id returned by Nominatim,
-Overpass Turbo replaces the expression by an _id_ query for the corresponding area,
-e.g. `area(3600065606)`.
+Вираз `{{geocodeArea:London}}` перенаправляє запит
+з _Overpass Turbo_ до _Nominatim_ для пошуку найбільш відповідних об'єктів з назвою `London`.
+Скориставшись ідентифікатором об'єктів з Nominatim,
+Overpass Turbo робить його підстановку в запит,
+наприклад `area(3600065606)`.
 
 <a name="full"/>
-## Full Data
+## Всі дані
 
-Now we want to download really all data in an area.
-This works almost with the request that we have used [as a tutorial](#per_tag).
-But we need to change the tool:
-For an area of the size of London, a threshold of 10 million objects or more is easily surpassed,
-while _Overpass Turbo_ already from 2000 objects on substantially slows down the browser.
+Тепер ми хочемо завантажити дійсно всі дані в області інтересу.
+Це працює майже так само із запитом, який ми використовували [як навчальний](#per_tag).
+Але нам потрібно змінити інструмент:
+Для області розміром з Лондон можна легко подолати поріг у 10 мільйонів об'єктів,
+в той час як _Overpass Turbo_ вже з 2000 об'єктів суттєво уповільнює роботу оглядача.
 
-In addition, for virtually all areas in official boundaries I suggest to rather use regional extracts.
-Details for this are in [the subsection about regional extracts](other_sources.md#regional).
+Крім того, практично для всіх територій в офіційних межах пропонується  використовувати регіональні вибірки.
+Подробиці про це в [підрозділі про регіональні вибірки](other_sources.md#regional).
 
-You can in both cases download the raw data directly to your local computer:
-For this purpose _Overpass Turbo_ offers in the _Export_ menu the link `download as raw OSM data`.
-It is normal that nothing happens immediately after the click.
-Downloading entire London can take several minutes.
+В обох випадках ви можете завантажити необроблені дані безпосередньо на ваш комп'ютер:
+Для цього _Overpass Turbo_ пропонує в меню _Експорт_  `завантаженя сирцевих даних OSM`.
+Це нормально, що відразу після клацання нічого не відбувається.
+Завантаження всього Лондона може зайняти кілька хвилин.
 
-It might be even easier to use download tools like [Wget](https://www.gnu.org/software/wget/) or [Curl](https://curl.haxx.se/).
-To exercise this, please store one of the queries from above in a local file, e.g. `london.ql`.
+Може бути простішим використовувати такі інструменти для завантаження, як [Wget](https://www.gnu.org/software/wget/) або [Curl](https://curl.haxx.se/).
+Щоб зробити це, будь ласка, збережіть один із запитів зверху в локальному файлі, напр. `london.ql`.
 
-You then can pose requests on the command line with
+Потім ви можете виконувати запити в командному рядку за допомогою
 <!-- NO_QL_LINK -->
 
     wget -O london.osm.gz --header='Accept-Encoding: gzip, deflate' \\
         --post-file=london.ql 'https://overpass-api.de/api/interpreter'
 
-respectively
+або
 <!-- NO_QL_LINK -->
 
     curl -H'Accept-Encoding: gzip, deflate' -d@- \\
         'https://overpass-api.de/api/interpreter' \\
         <london.ql >london.osm.gz
 
-Both commands can of course be written without the backslash in a single line.
-In both cases do you do to me, to you, and to all the other users a big favor
-if you set the additional header `Accept-Encoding: gzip, deflate`.
-This entitles the server to compress the data,
-and this reduces the data about sevenfold and relieves both ends of the connection.
+Обидві команди, звичайно, можна написати без зворотної косої риски в один рядок.
+В обох випадках ви зробите всім велику послугу
+якщо ви встановите додатковий заголовок `Accept-Encoding: gzip, deflate`.
+Це дає серверу право стискати дані,
+і це зменшує обсяг даних приблизно в сім разів і розвантажує обидва кінці з'єднання.
 
-Now we get to the request itself.
-Because a source of big amounts of unhelpful data are large-scale relations,
-there are several variants [adapted to each downstream use case](osm_types.md).
-We restrict here to an often well-adapted variant:
+Тепер переходимо до самого запиту.
+Оскільки джерелом великої кількості некорисних даних є великі зв'язки,
+існує кілька варіантів [адаптованих до кожного варіанту подальшого використання](osm_types.md).
+Обмежимось тут добре адаптованим варіантом:
 <!-- NO_QL_LINK -->
 
     area[name="London"]["wikipedia"="en:London"];
@@ -185,9 +186,9 @@ We restrict here to an often well-adapted variant:
     );
     out;
 
-As an alternative, a variant
-that demonstrates the use of an area as filter multiple times.
-To this end you need [to store](../preface/design.md#sets) the selected areas in a named _variable_:
+Як альтернатива, варіант
+що демонструє використання фільтра `(area)` кілька разів.
+В цьому випадку ми [зберігаємо](../preface/design.md#sets) обрану область інтересу в іменованій _змінній_:
 <!-- NO_QL_LINK -->
 
     area[name="London"]["wikipedia"="en:London"]->.area_of_interest;
@@ -198,42 +199,39 @@ To this end you need [to store](../preface/design.md#sets) the selected areas in
     );
     out;
 
-Here the query statement in line 3 writes its result into the default set `_`.
-Because the area selection is still needed in line 4,
-it must be stored in a different location than the default set,
-in this case `area_of_interest`.
+Тут оператор запиту в рядку 3 записує свій результат у типову змінну `_`.
+Оскільки область інтересу нам буде потрібна в рядку 4, її потрібно 
+зберегти в іншому місці ніж типовий вивід, в цьому випадку `area_of_interest`.
 
 <a name="combining"/>
-## Area inside an Area
+## Область в середині області
 
-We resume the task
-to select London as an area in Great Britain.
-This is not implemented directly,
-but there are again two other solutions.
+Повернемось до завдання
+вибрати Лондон у Великій Британії.
+Це не можна зробити безпосередньо,
+але знову є два рішення.
 
-One can search for objects
-that are [in the intersection of two areas](https://overpass-turbo.eu/?lat=51.5&lon=-0.1&zoom=8&Q=CGI_STUB):
+Перше, ви можете шукати об'єкти,
+які знаходяться [на перетині двох областей інтересу](https://overpass-turbo.eu/?lat=51.5&lon=-0.1&zoom=8&Q=CGI_STUB):
 
     area[name="London"]->.small;
     area[name="England"]->.big;
     nwr[shop=supermarket](area.small)(area.big);
     out center;
 
-The actual filtering takes place in the query statement in line 3;
-there are only objects admitted that meet all three filter criteria:
-The filter `[shop=supermarket]` admits only objects with this very tag.
-The filter `(area.small)` restricts this to objects
-that are situated within one of the areas from the set `small`.
-The filter `(area.big)` restricts this further to objects
-that are situated within one of the areas from the set `big`.
+Безпосередній відбір відбувається у рядку 3;
+тут знаходяться об'єкти які відповідають всім трьом умовам.
+Супермаркети – фільтр `[shop=supermarket]`.
+Фільтр `(area.small)` вибирає об'єкти, які знаходяться в одній з малих областей, змінна `.small`.
+А фільтр `(area.big)` вибирає об'єкти, які попадають в більшу область, змінна `big`.
 
-Now we need to arrange that in `small` and `big` are selected the intended areas.
-This is fulfilled by the queries for _areas_ in lines 1 and 2,
-that store their results each in the named variable.
+Ми маємо бути впевнені, що змінні `small` та `big` містять потрібні ділянки.
+Це зазначається запитами для _областей_ у рядках 1 та 2,
+які зберігають значення у власних іменованих змінних.
 
-The other approach uses the connection between _area_ and the created object,
-but this time in the direction converse to the effect of the _pivot_ filter.
-We [select](https://overpass-turbo.eu/?lat=51.5&lon=-0.1&zoom=8&Q=CGI_STUB) the generating object of the small area:
+Інший підхід використовує зв’язок між _area_ та створеним об'єктом, 
+але на цей раз у напрямку, протилежному ефекту фільтра _pivot_.
+Ми [обираємо](https://overpass-turbo.eu/?lat=51.5&lon=-0.1&zoom=8&Q=CGI_STUB) створений об'єкт для меншої області:
 
     area[name="England"];
     rel[name="London"](area);
@@ -241,60 +239,47 @@ We [select](https://overpass-turbo.eu/?lat=51.5&lon=-0.1&zoom=8&Q=CGI_STUB) the 
     nwr[shop=supermarket](area);
     out center;
 
-In line 4, we want for the filter `(area)` exactly the _area_ for the big London as input.
-For this purpose, we select in line 2 all _relations_
-that have the name _London_
-and are situated without one of the areas supplied as input to `(area)` via the default set `_`.
-All areas with the name _England_ have been stored in the default set in line 1.
+В рядку 4, ми використовуємо фільтр `(area)` для фільтрації саме по території Лондона.
+Для цього ми знайшли всі _зв'язки_ з назвою _London_ в рядку 2, які
+знаходяться в області заданій фільтром `(area)`, що зберігається в типовій змінній `_`.
+Всі області з назвою _England_ перед цим були записані до типової змінної у рядку 1.
 
-Now we need in line 4 areas,
-although the filter `(area)` cannot filter areas,
-and we thus have resorted to select _relations_ instead.
-This is done by `map_to_area`:
-it selects the areas that have been made from the objects in its input.
+Тепер нам потрібні області в рядку 4, 
+хоча фільтр `(area)` не може фільтрувати області, тому ми вдалися до вибору _зв'язків_ замість цього.
+Далі скористаємось `map_to_area`, щоб перетворити об'єкти у типовій змінні на області.
 
 <a name="background"/>
-## Technical Background
+## Технічні подробиці
 <!-- Not yet checked -->
 
-From the beginning of the Overpass API project on in the year 2009,
-the capability to check for A-is-in-B has been a design goal.
-But this is quite completely at odds with the requirement
-to [faithfully represent](../preface/assertions.md#faithful) the OpenStreetMap data:
-Areas are in OpenStreetMap a concept that mingles tags and geometry,
-and there have been credible endeavours
-to have an explicit data type _area_.
-The rules what exactly constitutes an area had not yet been settled that times.
-Not least mappers were wary that areas might get damaged quite often.
+Від початку проєкту Overpass API у 2009 р.
+можливість перевіряти наявність A-є-в-Б була метою проєкту.
+Але це цілком суперечить вимогам [правдивого представлення](../preface/assertions.md#faithful) даних OpenStreetMap.
+Області в OpenStreetMap є концепцією, яка поєднує теґи та геометрію, і були впевнені спроби мати явний тип даних _area_.
+На той час ще не були встановлені правила, що саме є областю.
+Не в останню чергу мапери побоювалися, що області можуть пошкоджуватися досить часто.
 
-For this reason, _areas_ are an explicit data type in the Overpass API.
-The server generates these in a loop in the background by a [scheme](https://github.com/drolbr/Overpass-API/tree/master/src/rules) that is separated from the software's source code.
-This way, operators of independent instances more easily can decide
-which areas they actually want to generate.
-Each _area_ obtains the tags from its generating object.
+З цієї причини _area_ є явним типом даних в Overpass API.
+Сервер генерує їх у фоновому режимі за допомогою [схеми](https://github.com/drolbr/Overpass-API/tree/master/src/rules), яка відокремлена від сирцевого коду.
+Таким чином, оператори незалежних запитів легше можуть вирішити, які області вони насправді хочуть створити.
+Кожна _область_ отримує теґи від об'єктів, з яких вона створюється.
 
-This has some effects:
+Це має певні наслідки:
 
-* Areas come into existence many hours later than there generating objects.
-  Respectively, changes to the generating object affect the area with a delay.
-* If an object does no longer constitute a geometrically valid area
-  then the old _area_ object remains unchanged until a new area can be generated from the generating object.
-* Areas have their own rules how their ids are disseminated.
-* Only a part of the filters that can be used for OpenStreetMap objects can also be used for _areas_.
+* Області з'являються на кілька годин пізніше, ніж об'єкти з яких вони створюються.
+  Відповідно, зміни в об'єктах, з яких створено області, впливають на зміни області із затримкою.
+* Якщо об'єкт більше не є геометрично правильною областю, то старий об'єкт _area_ залишається незмінним, доки з об'єкта, на основі якого була створена область, не можна буде створити нову область.
+* Області мають власні правила, як поширюються їхні ідентифікатори.
+* Лише частину фільтрів, які можна використовувати для об'єктів OpenStreetMap, також можна використовувати для _area_.
 
-But the big advantage is that the point-in-area-search works reliably and efficiently.
+Але велика перевага полягає в тому, що пошук точки в області працює надійно та ефективно.
 
-It turned out to be sometimes a disadvantage that not all generating objects still exist:
-nowadays almost any object that has a valid geometry for an area actually semantically is an area.
-But if the background loop does not consider the generating object to constitute an area by its tags
-then no corresponding area object is generated.
+Іноді виявляється, що не всі об'єкти з яких було створено область, залишаються існувати. Зараз, майже будь-який об'єкт, геометрія якого підходить для створення області, семантично є областю.
+Але якщо фоновий процес не вважає, що згенерований об'єкт утворює область відповідно до своїх теґів, то відповідна область не створюється.
 
-The other way round, for all the 10 years the project exists,
-I am not aware of any instance that has adapted the area rule scheme to its particular needs.
-There had been rather a tradeoff to accept fewer areas to save CPU time for the background loop.
-Thus, the rule scheme is de facto centralized,
-and this defeats most of the advantages of the approach.
+Однак, за роки існування проєкту автор не знайшов жодного випадку, який би реалізував правила створення областей для практичного використання.
+Був скоріше компроміс, що менше буде областей то менше процесорного часу буде витрачатись на їх створення.
+Таким чином, схема правил де-факто централізована, і це зводить нанівець більшість переваг підходу.
 
-For this reason, I meanwhile intend to
-also perform the area operations directly on the raw OpenStreetMap objects.
-For ways this has been implemented since version 0.7.57.
+З цієї причини автор тим часом також має намір виконувати операції з областями безпосередньо над необробленими об'єктами OpenStreetMap.
+Для ліній такий підхід був реалізований починаючи з версії 0.7.57.
