@@ -1,15 +1,14 @@
-Other sources
-=============
+Інші джерела
+============
 
-Overpass API is not the answer to every problem.
-This section presents alternatives,
-in particular working with data extracts.
+Overpass API не є універсальною відповіддю на всі проблеми.
+Цей розділ представляє альтернативи, щодо певних способів отримання даних.
 
-This section is about tools for users which are familiar with the command line.
-Services with a web interface are subject to the [next section](../criteria/nominatim.md).
+Він більше підходить користувачам, які знайомі з роботою з командним рядком.
+Сервіси, які пропонують вебінтерфейс є предметом розгляду в [наступному розділі](../criteria/nominatim.md).
 
 <a name="regional"/>
-## Regional Extracts
+## Регіональні вибірки
 
 ...
 <!--
